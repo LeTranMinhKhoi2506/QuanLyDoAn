@@ -1,0 +1,120 @@
+@model QuanLyDoAn.Models.DotDoAn
+
+@{
+    ViewData["Title"] = "Thêm Đợt Đồ Án";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-plus-circle me-2"></i>Thêm Đợt Đồ Án Mới</h1>
+        <a asp-action="Manage" class="btn btn-secondary"><i class="fas fa-arrow-left me-1"></i> Quay lại</a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thông tin đợt đồ án</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="TenDot" class="form-label">Tên đợt <span class="text-danger">*</span></label>
+                                <input asp-for="TenDot" class="form-control" placeholder="VD: Đợt 1 - Đồ án tốt nghiệp" />
+                                <span asp-validation-for="TenDot" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="LoaiDot" class="form-label">Loại đợt <span class="text-danger">*</span></label>
+                                <select asp-for="LoaiDot" class="form-select">
+                                    <option value="">-- Chọn loại --</option>
+                                    <option value="Đồ án">Đồ án</option>
+                                    <option value="Luận văn">Luận văn</option>
+                                </select>
+                                <span asp-validation-for="LoaiDot" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="HocKy" class="form-label">Học kỳ</label>
+                                <select asp-for="HocKy" class="form-select">
+                                    <option value="">-- Chọn học kỳ --</option>
+                                    <option value="HK1">Học kỳ 1</option>
+                                    <option value="HK2">Học kỳ 2</option>
+                                    <option value="HK3">Học kỳ 3</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="NamHoc" class="form-label">Năm học <span class="text-danger">*</span></label>
+                                <input asp-for="NamHoc" class="form-control" placeholder="VD: 2024-2025" />
+                                <span asp-validation-for="NamHoc" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="NgayBatDau" class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
+                                <input asp-for="NgayBatDau" type="date" class="form-control" />
+                                <span asp-validation-for="NgayBatDau" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="NgayKetThuc" class="form-label">Ngày kết thúc <span class="text-danger">*</span></label>
+                                <input asp-for="NgayKetThuc" type="date" class="form-control" />
+                                <span asp-validation-for="NgayKetThuc" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="HanDangKyDeTai" class="form-label">Hạn đăng ký đề tài <span class="text-danger">*</span></label>
+                                <input asp-for="HanDangKyDeTai" type="date" class="form-control" />
+                                <span asp-validation-for="HanDangKyDeTai" class="text-danger"></span>
+                                <small class="text-muted">Phải nằm trong khoảng ngày bắt đầu - kết thúc</small>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="HanNopBaoCao" class="form-label">Hạn nộp báo cáo <span class="text-danger">*</span></label>
+                                <input asp-for="HanNopBaoCao" type="date" class="form-control" />
+                                <span asp-validation-for="HanNopBaoCao" class="text-danger"></span>
+                                <small class="text-muted">Phải sau hạn đăng ký đề tài</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="MoTa" class="form-label">Mô tả</label>
+                            <textarea asp-for="MoTa" class="form-control" rows="4" placeholder="Mô tả chi tiết về đợt đồ án..."></textarea>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Lưu ý:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Ngày bắt đầu phải nhỏ hơn ngày kết thúc</li>
+                                <li>Hạn đăng ký đề tài phải nằm trong khoảng ngày bắt đầu - kết thúc</li>
+                                <li>Hạn nộp báo cáo phải sau hạn đăng ký đề tài</li>
+                                <li>Không nên tạo trùng tên đợt trong cùng học kỳ, năm học</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a asp-action="Manage" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i> Hủy
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Lưu đợt đồ án
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

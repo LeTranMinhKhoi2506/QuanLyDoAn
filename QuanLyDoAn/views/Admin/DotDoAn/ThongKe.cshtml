@@ -1,0 +1,186 @@
+@model QuanLyDoAn.Models.DotDoAn
+
+@{
+    ViewData["Title"] = "Thống kê đợt đồ án";
+    var thongKe = ViewBag.ThongKe as List<dynamic>;
+    var tongSo = ViewBag.TongSo as int?;
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-chart-bar me-2"></i>Thống kê Đợt Đồ Án</h1>
+        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary"><i class="fas fa-arrow-left me-1"></i> Quay lại</a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">@Model.TenDot - @Model.NamHoc</h6>
+                </div>
+                <div class="card-body">
+                    <h5 class="mb-4">Thống kê số lượng đề tài theo trạng thái</h5>
+                    
+                    @if (thongKe == null || !thongKe.Any())
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>Chưa có đề tài nào trong đợt này.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Trạng thái</th>
+                                        <th class="text-center">Số lượng</th>
+                                        <th class="text-center">Tỷ lệ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in thongKe)
+                                    {
+                                        var tyLe = tongSo > 0 ? (item.SoLuong * 100.0 / tongSo.Value).ToString("F1") : "0";
+                                        <tr>
+                                            <td>
+                                                @if (item.TrangThai == "Đã duyệt")
+                                                {
+                                                    <span class="badge bg-success">@item.TrangThai</span>
+                                                }
+                                                else if (item.TrangThai == "Chờ duyệt")
+                                                {
+                                                    <span class="badge bg-warning">@item.TrangThai</span>
+                                                }
+                                                else if (item.TrangThai == "Từ chối")
+                                                {
+                                                    <span class="badge bg-danger">@item.TrangThai</span>
+                                                }
+                                                else if (item.TrangThai == "Đang thực hiện")
+                                                {
+                                                    <span class="badge bg-info">@item.TrangThai</span>
+                                                }
+                                                else if (item.TrangThai == "Hoàn thành")
+                                                {
+                                                    <span class="badge bg-primary">@item.TrangThai</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">@item.TrangThai</span>
+                                                }
+                                            </td>
+                                            <td class="text-center fw-bold">@item.SoLuong</td>
+                                            <td class="text-center">@tyLe%</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <th>Tổng cộng</th>
+                                        <th class="text-center">@tongSo</th>
+                                        <th class="text-center">100%</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <div class="mt-4">
+                            <h6 class="fw-bold mb-3">Biểu đồ trực quan</h6>
+                            @foreach (var item in thongKe)
+                            {
+                                var tyLe = tongSo > 0 ? (item.SoLuong * 100.0 / tongSo.Value) : 0;
+                                var colorClass = item.TrangThai == "Đã duyệt" ? "bg-success" :
+                                               item.TrangThai == "Chờ duyệt" ? "bg-warning" :
+                                               item.TrangThai == "Từ chối" ? "bg-danger" :
+                                               item.TrangThai == "Đang thực hiện" ? "bg-info" :
+                                               item.TrangThai == "Hoàn thành" ? "bg-primary" : "bg-secondary";
+                                
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span>@item.TrangThai</span>
+                                        <span class="fw-bold">@item.SoLuong (@tyLe.ToString("F1")%)</span>
+                                    </div>
+                                    <div class="progress" style="height: 25px;">
+                                        <div class="progress-bar @colorClass" role="progressbar" style="width: @tyLe%" aria-valuenow="@tyLe" aria-valuemin="0" aria-valuemax="100">
+                                            @item.SoLuong
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thông tin đợt</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <th>Loại đợt:</th>
+                            <td>@Model.LoaiDot</td>
+                        </tr>
+                        <tr>
+                            <th>Học kỳ:</th>
+                            <td>@Model.HocKy</td>
+                        </tr>
+                        <tr>
+                            <th>Năm học:</th>
+                            <td>@Model.NamHoc</td>
+                        </tr>
+                        <tr>
+                            <th>Trạng thái:</th>
+                            <td>
+                                @if (Model.DaKhoa)
+                                {
+                                    <span class="badge bg-dark">Đã khóa</span>
+                                }
+                                else if (Model.TrangThai == "Đang mở")
+                                {
+                                    <span class="badge bg-success">Đang mở</span>
+                                }
+                                else if (Model.TrangThai == "Đã đóng")
+                                {
+                                    <span class="badge bg-secondary">Đã đóng</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning">Chưa mở</span>
+                                }
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card shadow mb-4 border-left-primary">
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Tổng số đề tài
+                        </div>
+                        <div class="h2 mb-0 font-weight-bold text-gray-800">@tongSo</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thao tác khác</h6>
+                </div>
+                <div class="card-body">
+                    <a asp-action="SinhVienTrongDot" asp-route-id="@Model.Id" class="btn btn-info w-100 mb-2">
+                        <i class="fas fa-users me-1"></i> Danh sách sinh viên
+                    </a>
+                    <a asp-action="DeTaiTrongDot" asp-route-id="@Model.Id" class="btn btn-primary w-100">
+                        <i class="fas fa-book me-1"></i> Danh sách đề tài
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,128 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="h3 mb-0 text-gray-800">Tổng quan hệ thống (Admin)</h2>
+</div>
+
+<div class="row">
+    <!-- Sinh Viên Card -->
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2 border-primary" style="border-left: .25rem solid #0d6efd!important;">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Tổng Số Sinh Viên</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="stat-sv">0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fa-solid fa-users fa-2x text-gray-300 text-muted"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Giảng Viên Card -->
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2 border-success" style="border-left: .25rem solid #198754!important;">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Tổng Giảng Viên</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="stat-gv">0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fa-solid fa-chalkboard-teacher fa-2x text-gray-300 text-muted"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chưa Đăng Ký Card -->
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-danger shadow h-100 py-2 border-danger" style="border-left: .25rem solid #dc3545!important;">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">SV Chưa Đăng Ký Đề Tài</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="stat-chua-dk">0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fa-solid fa-user-xmark fa-2x text-gray-300 text-muted"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Đề Tài Chờ Duyệt Card -->
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2 border-warning" style="border-left: .25rem solid #ffc107!important;">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Đề Tài Chờ Duyệt</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="stat-cho-duyet">0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fa-solid fa-clock-rotate-left fa-2x text-gray-300 text-muted"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Đề Tài Đang Thực Hiện Card -->
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2 border-info" style="border-left: .25rem solid #0dcaf0!important;">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Đề Tài Đang Thực Hiện</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="stat-dang-th">0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fa-solid fa-spinner fa-2x text-gray-300 text-muted"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Đề Tài Hoàn Thành Card -->
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-dark shadow h-100 py-2 border-dark" style="border-left: .25rem solid #212529!important;">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-dark text-uppercase mb-1">Đề Tài Hoàn Thành</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="stat-hoan-thanh">0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fa-solid fa-check-double fa-2x text-gray-300 text-muted"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $.get("/Admin/GetDashboardStats", function (data) {
+                $("#stat-sv").text(data.totalSinhVien);
+                $("#stat-gv").text(data.totalGiangVien);
+                $("#stat-cho-duyet").text(data.deTaiChoDuyet);
+                $("#stat-dang-th").text(data.deTaiDangThucHien);
+                $("#stat-hoan-thanh").text(data.deTaiHoanThanh);
+                $("#stat-chua-dk").text(data.sinhVienChuaDangKy);
+            });
+        });
+    </script>
+}

@@ -1,0 +1,52 @@
+@model IEnumerable<QuanLyDoAn.Models.User>
+
+@{
+    ViewData["Title"] = "Quản lý Tài Khoản Hệ Thống";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="h3 mb-0 text-gray-800">Quản lý Tài Khoản (Users)</h2>
+    <a asp-controller="TaiKhoan" asp-action="Create" class="btn btn-primary shadow-sm"><i class="fa-solid fa-plus-circle fa-sm text-white-50 me-1"></i> Tạo tài khoản mới</a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Danh sách tài khoản</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID User</th>
+                        <th>Tên Đăng Nhập</th>
+                        <th>Quyền Hạn (Role)</th>
+                        <th class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var currUser in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold text-success">@currUser.Id</td>
+                            <td>@currUser.Username</td>
+                            <td>
+                                @if (currUser.Role == "Admin") { <span class="badge bg-danger">@currUser.Role</span> }
+                                else if (currUser.Role == "Giảng viên") { <span class="badge bg-primary">@currUser.Role</span> }
+                                else { <span class="badge bg-info text-dark">@currUser.Role</span> }
+                            </td>
+                            <td class="text-center">
+                                <a asp-controller="TaiKhoan" asp-action="Edit" asp-route-id="@currUser.Id" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-pen"></i></a>
+                                <a asp-controller="TaiKhoan" asp-action="Delete" asp-route-id="@currUser.Id" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i></a>
+                            </td>
+                        </tr>
+                    }
+                    @if(!Model.Any())
+                    {
+                        <tr><td colspan="4" class="text-center">Chưa có Account nào!</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

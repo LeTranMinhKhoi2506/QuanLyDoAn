@@ -1,0 +1,122 @@
+@{
+    ViewData["Title"] = "Dashboard Giảng Viên";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="h3 mb-0 text-gray-800">Tổng quan (Giảng viên)</h2>
+</div>
+
+<div class="row">
+    <!-- Sinh viên hướng dẫn Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2 border-primary" style="border-left: .25rem solid #0d6efd!important;">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">SV Đang Hướng Dẫn</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="stat-sv-hd">0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fa-solid fa-users fa-2x text-gray-300 text-muted"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Đề tài chờ duyệt Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2 border-warning" style="border-left: .25rem solid #ffc107!important;">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Đề Tài Chờ Duyệt</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="stat-dt-cho">0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fa-solid fa-list-check fa-2x text-gray-300 text-muted"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tiến độ / Báo cáo Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2 border-info" style="border-left: .25rem solid #0dcaf0!important;">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Báo Cáo Cần Nhận Xét</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="stat-bao-cao">0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fa-solid fa-comments fa-2x text-gray-300 text-muted"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Đề tài hoàn thành Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2 border-success" style="border-left: .25rem solid #198754!important;">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Đề Tài Hoàn Thành</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="stat-dt-hoan-thanh">0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fa-solid fa-check-circle fa-2x text-gray-300 text-muted"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="card shadow mb-4 border-0">
+            <div class="card-header py-3 bg-white">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="fa-solid fa-share-nodes"></i> Luồng công việc hướng dẫn</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between text-center mt-3 mb-4" style="position: relative;">
+                    <div style="position: absolute; top: 20px; left: 10%; right: 10%; height: 3px; background-color: #e9ecef; z-index: 1;"></div>
+
+                    <div style="z-index: 2; background-color: #fff; padding: 0 10px;">
+                        <a href="/GV/DeTaiChoDuyet" class="btn btn-outline-warning rounded-circle mb-2" style="width: 45px; height: 45px;"><i class="fa-solid fa-1"></i></a>
+                        <p class="small text-muted mb-0">Duyệt/Từ chối</p>
+                    </div>
+                    <div style="z-index: 2; background-color: #fff; padding: 0 10px;">
+                        <a href="/GV/DeTaiDangHuongDan" class="btn btn-outline-info rounded-circle mb-2" style="width: 45px; height: 45px;"><i class="fa-solid fa-2"></i></a>
+                        <p class="small text-muted mb-0">Theo dõi tiến độ</p>
+                    </div>
+                    <div style="z-index: 2; background-color: #fff; padding: 0 10px;">
+                        <a href="/GV/TienDo" class="btn btn-outline-primary rounded-circle mb-2" style="width: 45px; height: 45px;"><i class="fa-solid fa-3"></i></a>
+                        <p class="small text-muted mb-0">Nhận xét/Chỉnh sửa</p>
+                    </div>
+                    <div style="z-index: 2; background-color: #fff; padding: 0 10px;">
+                        <a href="/GV/ChamDiem" class="btn btn-outline-success rounded-circle mb-2" style="width: 45px; height: 45px;"><i class="fa-solid fa-4"></i></a>
+                        <p class="small text-muted mb-0">Chấm điểm</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $.get("/GV/GetDashboardStats", function (data) {
+                $("#stat-sv-hd").text(data.svDangHuongDan);
+                $("#stat-dt-cho").text(data.dtChoDuyet);
+                $("#stat-bao-cao").text(data.soBaoCaoCanNhanXet);
+                $("#stat-dt-hoan-thanh").text(data.dtHoanThanh);
+            });
+        });
+    </script>
+}

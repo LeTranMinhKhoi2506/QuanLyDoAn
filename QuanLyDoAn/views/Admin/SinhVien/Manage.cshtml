@@ -1,0 +1,56 @@
+@model IEnumerable<QuanLyDoAn.Models.SinhVien>
+
+@{
+    ViewData["Title"] = "Quản lý Sinh Viên";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="h3 mb-0 text-gray-800">Danh sách Sinh Viên</h2>
+    <a asp-controller="SinhVien" asp-action="Create" class="btn btn-primary shadow-sm"><i class="fa-solid fa-plus fa-sm text-white-50 me-1"></i> Thêm sinh viên mới</a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Tất cả sinh viên</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover w-100 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã SV</th>
+                        <th>Họ Tên</th>
+                        <th>Lớp</th>
+                        <th>Email</th>
+                        <th>Điện Thoại</th>
+                        <th>Trạng Thái</th>
+                        <th class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model) {
+                        <tr>
+                            <td>@item.MaSinhVien</td>
+                            <td class="fw-bold">@item.HoTen</td>
+                            <td>@item.Lop</td>
+                            <td>@item.Email</td>
+                            <td>@item.SoDienThoai</td>
+                            <td>
+                                @if (item.TrangThai == "Đang học") { <span class="badge bg-success">@item.TrangThai</span> }
+                                else { <span class="badge bg-secondary">@item.TrangThai</span> }
+                            </td>
+                            <td class="text-center">
+                                <a asp-controller="SinhVien" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-pen-to-square"></i></a>
+                                <a asp-controller="SinhVien" asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash-can"></i></a>
+                            </td>
+                        </tr>
+                    }
+                    @if(!Model.Any())
+                    {
+                        <tr><td colspan="7" class="text-center text-muted py-4">Chưa có dữ liệu sinh viên nào trong hệ thống.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,90 @@
+@model IEnumerable<QuanLyDoAn.Models.DeTai>
+
+@{
+    ViewData["Title"] = "Đề tài trong đợt";
+    var dot = ViewBag.DotDoAn as QuanLyDoAn.Models.DotDoAn;
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-book me-2"></i>Đề tài trong đợt</h1>
+        <a asp-action="Details" asp-route-id="@dot.Id" class="btn btn-secondary"><i class="fas fa-arrow-left me-1"></i> Quay lại</a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">@dot.TenDot - @dot.NamHoc</h6>
+        </div>
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>Chưa có đề tài nào trong đợt này.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>STT</th>
+                                <th>Mã đề tài</th>
+                                <th>Tên đề tài</th>
+                                <th>Sinh viên</th>
+                                <th>Giảng viên HD</th>
+                                <th>Loại</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ int stt = 1; }
+                            @foreach (var dt in Model)
+                            {
+                                <tr>
+                                    <td>@stt</td>
+                                    <td>@dt.MaDeTai</td>
+                                    <td class="fw-bold">@dt.TenDeTai</td>
+                                    <td>@(dt.SinhVien?.HoTen ?? "Chưa có")</td>
+                                    <td>@(dt.GiangVien?.HoTen ?? "Chưa có")</td>
+                                    <td>
+                                        @if (dt.LoaiDeTai == "Đồ án")
+                                        {
+                                            <span class="badge bg-info">@dt.LoaiDeTai</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning">@dt.LoaiDeTai</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (dt.TrangThai == "Đã duyệt")
+                                        {
+                                            <span class="badge bg-success">@dt.TrangThai</span>
+                                        }
+                                        else if (dt.TrangThai == "Chờ duyệt")
+                                        {
+                                            <span class="badge bg-warning">@dt.TrangThai</span>
+                                        }
+                                        else if (dt.TrangThai == "Từ chối")
+                                        {
+                                            <span class="badge bg-danger">@dt.TrangThai</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">@dt.TrangThai</span>
+                                        }
+                                    </td>
+                                </tr>
+                                stt++;
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-3">
+                    <strong>Tổng số đề tài:</strong> @Model.Count()
+                </div>
+            }
+        </div>
+    </div>
+</div>

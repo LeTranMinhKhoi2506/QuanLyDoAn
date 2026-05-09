@@ -1,0 +1,46 @@
+@model QuanLyDoAn.Models.User
+
+@{
+    ViewData["Title"] = "Xoá Tài Khoản";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow mb-4 border-danger">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between bg-danger text-white">
+                <h6 class="m-0 font-weight-bold"><i class="fa-solid fa-triangle-exclamation me-2"></i>Xác nhận xoá tài khoản</h6>
+                <a asp-controller="TaiKhoan" asp-action="Manage" class="btn btn-sm btn-light"><i class="fa-solid fa-arrow-left me-1"></i> Quay lại</a>
+            </div>
+            <div class="card-body">
+                <p class="mb-4">Bạn có chắc chắn muốn xoá tài khoản sau không? Hành động này <strong>không thể hoàn tác</strong>.</p>
+
+                <table class="table table-bordered">
+                    <tr>
+                        <th class="w-25">ID</th>
+                        <td>@Model.Id</td>
+                    </tr>
+                    <tr>
+                        <th>Tên đăng nhập</th>
+                        <td class="fw-bold">@Model.Username</td>
+                    </tr>
+                    <tr>
+                        <th>Quyền hạn</th>
+                        <td>
+                            @if (Model.Role == "Admin") { <span class="badge bg-danger">@Model.Role</span> }
+                            else if (Model.Role == "Giảng viên") { <span class="badge bg-primary">@Model.Role</span> }
+                            else { <span class="badge bg-info text-dark">@Model.Role</span> }
+                        </td>
+                    </tr>
+                </table>
+
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-controller="TaiKhoan" asp-action="Manage" class="btn btn-secondary"><i class="fa-solid fa-xmark me-1"></i> Huỷ</a>
+                        <button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash-can me-1"></i> Xác nhận xoá</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

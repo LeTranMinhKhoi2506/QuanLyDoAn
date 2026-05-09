@@ -1,0 +1,73 @@
+@model IEnumerable<QuanLyDoAn.Models.SinhVien>
+
+@{
+    ViewData["Title"] = "Sinh viên trong đợt";
+    var dot = ViewBag.DotDoAn as QuanLyDoAn.Models.DotDoAn;
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-users me-2"></i>Sinh viên trong đợt</h1>
+        <a asp-action="Details" asp-route-id="@dot.Id" class="btn btn-secondary"><i class="fas fa-arrow-left me-1"></i> Quay lại</a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">@dot.TenDot - @dot.NamHoc</h6>
+        </div>
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>Chưa có sinh viên nào đăng ký đề tài trong đợt này.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>STT</th>
+                                <th>Mã SV</th>
+                                <th>Họ tên</th>
+                                <th>Lớp</th>
+                                <th>Email</th>
+                                <th>Số điện thoại</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ int stt = 1; }
+                            @foreach (var sv in Model)
+                            {
+                                <tr>
+                                    <td>@stt</td>
+                                    <td>@sv.MaSinhVien</td>
+                                    <td class="fw-bold">@sv.HoTen</td>
+                                    <td>@sv.Lop</td>
+                                    <td>@sv.Email</td>
+                                    <td>@sv.SoDienThoai</td>
+                                    <td>
+                                        @if (sv.TrangThai == "Đang học")
+                                        {
+                                            <span class="badge bg-success">@sv.TrangThai</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">@sv.TrangThai</span>
+                                        }
+                                    </td>
+                                </tr>
+                                stt++;
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-3">
+                    <strong>Tổng số sinh viên:</strong> @Model.Count()
+                </div>
+            }
+        </div>
+    </div>
+</div>

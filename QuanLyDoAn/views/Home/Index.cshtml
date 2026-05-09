@@ -1,0 +1,151 @@
+@{
+    ViewData["Title"] = "Trang chủ Dashboard";
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="mb-3">Tổng quan hệ thống</h2>
+    </div>
+
+    <!-- Các khối thống kê -->
+    <div class="col-md-3 mb-4">
+        <div class="card bg-primary text-white h-100 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="me-3">
+                        <div class="text-white-50 small">Tổng số Đề tài</div>
+                        <div class="text-lg fw-bold" id="totalDeTai">0</div>
+                    </div>
+                    <i class="fa-solid fa-file-alt fa-2x text-white-50"></i>
+                </div>
+            </div>
+            <div class="card-footer d-flex align-items-center justify-content-between small">
+                <a class="text-white stretched-link" href="#">Xem chi tiết</a>
+                <div class="text-white"><i class="fa-solid fa-angle-right"></i></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card bg-success text-white h-100 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="me-3">
+                        <div class="text-white-50 small">Tổng Giảng viên</div>
+                        <div class="text-lg fw-bold" id="totalGiangVien">0</div>
+                    </div>
+                    <i class="fa-solid fa-chalkboard-teacher fa-2x text-white-50"></i>
+                </div>
+            </div>
+            <div class="card-footer d-flex align-items-center justify-content-between small">
+                <a class="text-white stretched-link" href="#">Xem chi tiết</a>
+                <div class="text-white"><i class="fa-solid fa-angle-right"></i></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card bg-info text-white h-100 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="me-3">
+                        <div class="text-white-50 small">Tổng Sinh viên</div>
+                        <div class="text-lg fw-bold" id="totalSinhVien">0</div>
+                    </div>
+                    <i class="fa-solid fa-user-graduate fa-2x text-white-50"></i>
+                </div>
+            </div>
+            <div class="card-footer d-flex align-items-center justify-content-between small">
+                <a class="text-white stretched-link" href="#">Xem chi tiết</a>
+                <div class="text-white"><i class="fa-solid fa-angle-right"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Danh sách Đề tài mới đăng ký -->
+    <div class="col-lg-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="fa-solid fa-list-check me-2"></i>Danh sách Đề Tài gần đây</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0 table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Tên đề tài</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deTaiTableBody">
+                            <tr>
+                                <td colspan="3" class="text-center">Đang tải dữ liệu...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Load dashboard data from your Web APIs
+            loadDashboardData();
+        });
+
+        function loadDashboardData() {
+            // Fetch Giảng Viên count
+            $.get("/api/GiangVien", function(data) {
+                $("#totalGiangVien").text(data.length || 0);
+            });
+
+            // Fetch Sinh Viên count
+            $.get("/api/SinhVien", function(data) {
+                $("#totalSinhVien").text(data.length || 0);
+            });
+
+            // Fetch Đề Tài data
+            $.get("/api/DeTai", function(data) {
+                if (data && data.length >= 0) {
+                    $("#totalDeTai").text(data.length);
+                    renderDeTaiTable(data);
+                }
+            }).fail(function() {
+                $("#deTaiTableBody").html('<tr><td colspan="3" class="text-center text-danger">Lỗi khi tải dữ liệu</td></tr>');
+            });
+        }
+
+        function renderDeTaiTable(data) {
+            var tbody = $("#deTaiTableBody");
+            tbody.empty();
+
+            if (data.length === 0) {
+                tbody.append('<tr><td colspan="3" class="text-center">Chưa có đề tài nào</td></tr>');
+                return;
+            }
+
+            // Hiển thị 5 đề tài mới nhất
+            for (var i = 0; i < Math.min(data.length, 5); i++) {
+                var dt = data[i];
+                var statusClass = 'bg-secondary';
+                if(dt.trangThai === 'Đang thực hiện') statusClass = 'bg-primary';
+                else if(dt.trangThai === 'Đã duyệt') statusClass = 'bg-success';
+                else if(dt.trangThai === 'Chờ duyệt') statusClass = 'bg-warning text-dark';
+                else if(dt.trangThai === 'Bị từ chối') statusClass = 'bg-danger';
+
+                var row = `<tr>
+                               <td>${dt.maDeTai || dt.id}</td>
+                               <td>${dt.tenDeTai}</td>
+                               <td><span class="badge ${statusClass}">${dt.trangThai || 'Không xác định'}</span></td>
+                           </tr>`;
+                tbody.append(row);
+            }
+        }
+    </script>
+}

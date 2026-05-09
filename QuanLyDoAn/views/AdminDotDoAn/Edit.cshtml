@@ -1,0 +1,109 @@
+@model QuanLyDoAn.Models.DotDoAn
+
+@{
+    ViewData["Title"] = "Cập nhật Đợt Đồ Án";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-edit me-2"></i>Cập nhật Đợt Đồ Án</h1>
+        <a asp-action="Manage" class="btn btn-secondary"><i class="fas fa-arrow-left me-1"></i> Quay lại</a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Chỉnh sửa thông tin đợt</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="TenDot" class="form-label">Tên đợt <span class="text-danger">*</span></label>
+                                <input asp-for="TenDot" class="form-control" />
+                                <span asp-validation-for="TenDot" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="LoaiDot" class="form-label">Loại đợt <span class="text-danger">*</span></label>
+                                <select asp-for="LoaiDot" class="form-select">
+                                    <option value="">-- Chọn loại --</option>
+                                    <option value="Đồ án">Đồ án</option>
+                                    <option value="Luận văn">Luận văn</option>
+                                </select>
+                                <span asp-validation-for="LoaiDot" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="HocKy" class="form-label">Học kỳ</label>
+                                <select asp-for="HocKy" class="form-select">
+                                    <option value="">-- Chọn học kỳ --</option>
+                                    <option value="HK1">Học kỳ 1</option>
+                                    <option value="HK2">Học kỳ 2</option>
+                                    <option value="HK3">Học kỳ 3</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="NamHoc" class="form-label">Năm học <span class="text-danger">*</span></label>
+                                <input asp-for="NamHoc" class="form-control" />
+                                <span asp-validation-for="NamHoc" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="NgayBatDau" class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
+                                <input asp-for="NgayBatDau" type="date" class="form-control" value="@Model.NgayBatDau.ToString("yyyy-MM-dd")" />
+                                <span asp-validation-for="NgayBatDau" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="NgayKetThuc" class="form-label">Ngày kết thúc <span class="text-danger">*</span></label>
+                                <input asp-for="NgayKetThuc" type="date" class="form-control" value="@Model.NgayKetThuc.ToString("yyyy-MM-dd")" />
+                                <span asp-validation-for="NgayKetThuc" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="HanDangKyDeTai" class="form-label">Hạn đăng ký đề tài <span class="text-danger">*</span></label>
+                                <input asp-for="HanDangKyDeTai" type="date" class="form-control" value="@Model.HanDangKyDeTai.ToString("yyyy-MM-dd")" />
+                                <span asp-validation-for="HanDangKyDeTai" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="HanNopBaoCao" class="form-label">Hạn nộp báo cáo <span class="text-danger">*</span></label>
+                                <input asp-for="HanNopBaoCao" type="date" class="form-control" value="@Model.HanNopBaoCao.ToString("yyyy-MM-dd")" />
+                                <span asp-validation-for="HanNopBaoCao" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="MoTa" class="form-label">Mô tả</label>
+                            <textarea asp-for="MoTa" class="form-control" rows="4"></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a asp-action="Manage" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i> Hủy
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Cập nhật
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
