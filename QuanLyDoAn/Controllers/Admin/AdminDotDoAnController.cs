@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using QuanLyDoAn.Data;
 using QuanLyDoAn.Models;
 
-namespace QuanLyDoAn.Controllers;
+namespace QuanLyDoAn.Controllers.Admin;
 
 public class AdminDotDoAnController : Controller
 {
@@ -21,13 +21,13 @@ public class AdminDotDoAnController : Controller
             .Include(d => d.DeTais)
             .OrderByDescending(d => d.NgayTao)
             .ToListAsync();
-        return View(dots);
+        return View("~/Views/Admin/DotDoAn/Manage.cshtml", dots);
     }
 
     // 2. Thêm đợt mới - GET
     public IActionResult Create()
     {
-        return View();
+        return View("~/Views/Admin/DotDoAn/Create.cshtml");
     }
 
     // 2. Thêm đợt mới - POST
@@ -61,7 +61,7 @@ public class AdminDotDoAnController : Controller
             ModelState.AddModelError("TenDot", "Đã tồn tại đợt này trong cùng học kỳ, năm học");
 
         if (!ModelState.IsValid)
-            return View(model);
+            return View("~/Views/Admin/DotDoAn/Create.cshtml", model);
 
         model.TrangThai = "Chưa mở";
         model.NgayTao = DateTime.Now;
@@ -88,7 +88,7 @@ public class AdminDotDoAnController : Controller
             return RedirectToAction(nameof(Manage));
         }
 
-        return View(dot);
+        return View("~/Views/Admin/DotDoAn/Edit.cshtml", dot);
     }
 
     // 3. Cập nhật thông tin đợt - POST
@@ -123,7 +123,7 @@ public class AdminDotDoAnController : Controller
             ModelState.AddModelError("HanNopBaoCao", "Hạn nộp báo cáo phải sau hạn đăng ký");
 
         if (!ModelState.IsValid)
-            return View(model);
+            return View("~/Views/Admin/DotDoAn/Edit.cshtml", model);
 
         dot.TenDot = model.TenDot;
         dot.LoaiDot = model.LoaiDot;
@@ -154,7 +154,7 @@ public class AdminDotDoAnController : Controller
         if (dot == null)
             return NotFound();
 
-        return View(dot);
+        return View("~/Views/Admin/DotDoAn/Details.cshtml", dot);
     }
 
     // 5. Mở đợt đăng ký
@@ -249,7 +249,7 @@ public class AdminDotDoAnController : Controller
             return NotFound();
 
         ViewBag.DotDoAn = dot;
-        return View(dot.DeTais.Where(dt => dt.SinhVien != null).Select(dt => dt.SinhVien).Distinct().ToList());
+        return View("~/Views/Admin/DotDoAn/SinhVienTrongDot.cshtml", dot.DeTais.Where(dt => dt.SinhVien != null).Select(dt => dt.SinhVien).Distinct().ToList());
     }
 
     // 8. Xem danh sách đề tài thuộc đợt
@@ -266,7 +266,7 @@ public class AdminDotDoAnController : Controller
             return NotFound();
 
         ViewBag.DotDoAn = dot;
-        return View(dot.DeTais.ToList());
+        return View("~/Views/Admin/DotDoAn/DeTaiTrongDot.cshtml", dot.DeTais.ToList());
     }
 
     // 9. Thống kê số lượng đề tài theo trạng thái
@@ -288,6 +288,6 @@ public class AdminDotDoAnController : Controller
         ViewBag.ThongKe = thongKe;
         ViewBag.TongSo = dot.DeTais.Count;
 
-        return View(dot);
+        return View("~/Views/Admin/DotDoAn/ThongKe.cshtml", dot);
     }
 }

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using QuanLyDoAn.Data;
 using QuanLyDoAn.Models;
 
-namespace QuanLyDoAn.Controllers;
+namespace QuanLyDoAn.Controllers.Auth;
 
 public class AuthController : Controller
 {

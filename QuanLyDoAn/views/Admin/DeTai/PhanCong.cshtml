@@ -1,0 +1,113 @@
+@model IEnumerable<QuanLyDoAn.Models.DeTai>
+
+@{
+    ViewData["Title"] = "Phân công Giảng viên";
+    var giangViens = ViewBag.GiangViens as List<QuanLyDoAn.Models.GiangVien> ?? new();
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-user-plus me-2"></i>Phân công Giảng viên Hướng dẫn</h1>
+    <a asp-controller="AdminDeTai" asp-action="Manage" class="btn btn-secondary btn-sm">
+        <i class="fas fa-arrow-left me-1"></i>Quay lại
+    </a>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Filter theo đợt -->
+<div class="card shadow mb-4">
+    <div class="card-body py-3">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label small fw-bold">Lọc theo đợt đồ án</label>
+                <select name="dotDoAnId" class="form-select form-select-sm" asp-items="ViewBag.DotDoAnList">
+                    <option value="">-- Tất cả --</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-filter me-1"></i>Lọc</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Đề tài cần phân công (@Model.Count())</h6>
+    </div>
+    <div class="card-body">
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>Không có đề tài nào cần phân công.</div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Tên đề tài</th>
+                            <th>Sinh viên</th>
+                            <th>Đợt</th>
+                            <th>Trạng thái</th>
+                            <th>GV hiện tại</th>
+                            <th style="min-width:220px">Phân công</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var dt in Model)
+                        {
+                            <tr>
+                                <td class="fw-bold">@dt.TenDeTai</td>
+                                <td>@(dt.SinhVien?.HoTen ?? "—")</td>
+                                <td><small>@(dt.DotDoAn?.TenDot ?? "—")</small></td>
+                                <td>
+                                    @{
+                                        var bc = dt.TrangThai == "Chờ duyệt" ? "bg-warning text-dark" : "bg-success";
+                                    }
+                                    <span class="badge @bc">@dt.TrangThai</span>
+                                </td>
+                                <td>
+                                    @if (dt.GiangVien != null)
+                                    {
+                                        <span class="text-success"><i class="fas fa-check me-1"></i>@dt.GiangVien.HoTen</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Chưa có</span>
+                                    }
+                                </td>
+                                <td>
+                                    <form asp-controller="AdminDeTai" asp-action="PhanCongGiangVien" method="post"
+                                          class="d-flex gap-1">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="deTaiId" value="@dt.Id" />
+                                        <select name="giangVienId" class="form-select form-select-sm" required>
+                                            <option value="">-- Chọn GV --</option>
+                                            @foreach (var gv in giangViens)
+                                            {
+                                                var selected = dt.GiangVienId == gv.Id ? "selected" : null;
+                                                <option value="@gv.Id" selected="@selected">
+                                                    @gv.HoTen (@gv.SoLuongSinhVienDangHuongDan/@gv.GioiHanSinhVien)
+                                                </option>
+                                            }
+                                        </select>
+                                        <button type="submit" class="btn btn-primary btn-sm" title="Lưu">
+                                            <i class="fas fa-save"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

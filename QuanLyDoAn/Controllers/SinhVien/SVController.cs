@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using QuanLyDoAn.Data;
 using System.Security.Claims;
 
-namespace QuanLyDoAn.Controllers;
+namespace QuanLyDoAn.Controllers.SinhVien;
 
 [Authorize(Roles = "Sinh viên")]
 public class SVController : Controller

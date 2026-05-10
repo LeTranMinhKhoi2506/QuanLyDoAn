@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using QuanLyDoAn.Data;
 using QuanLyDoAn.Models;
 
-namespace QuanLyDoAn.Controllers;
+namespace QuanLyDoAn.Controllers.Api;
 
 [ApiController]
 [Route("api/[controller]")]
