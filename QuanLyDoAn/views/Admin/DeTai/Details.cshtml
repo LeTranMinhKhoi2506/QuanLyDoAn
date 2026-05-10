@@ -1,14 +1,30 @@
 @model QuanLyDoAn.Models.DeTai
-
 @{
     ViewData["Title"] = "Chi tiết Đề Tài";
+    var danhSachTrangThai = new[] { "Chờ duyệt", "Đã duyệt", "Bị từ chối", "Đang thực hiện", "Yêu cầu chỉnh sửa", "Đã nộp báo cáo", "Đã hoàn thành", "Đã hủy" };
+    var badgeClass = Model.TrangThai switch {
+        "Chờ duyệt"          => "bg-warning text-dark",
+        "Đã duyệt"           => "bg-success",
+        "Bị từ chối"         => "bg-danger",
+        "Đang thực hiện"     => "bg-info",
+        "Yêu cầu chỉnh sửa" => "bg-warning",
+        "Đã nộp báo cáo"     => "bg-primary",
+        "Đã hoàn thành"      => "bg-success",
+        "Đã hủy"             => "bg-secondary",
+        _                    => "bg-secondary"
+    };
 }
 
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-folder-open me-2"></i>Chi tiết Đề Tài</h1>
-    <a asp-controller="AdminDeTai" asp-action="Manage" class="btn btn-secondary btn-sm">
-        <i class="fas fa-arrow-left me-1"></i>Quay lại
-    </a>
+    <h1 class="h3 mb-0"><i class="fas fa-folder-open me-2"></i>Chi tiết Đề Tài</h1>
+    <div class="d-flex gap-2">
+        <a asp-controller="AdminDeTai" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning btn-sm">
+            <i class="fas fa-edit me-1"></i>Sửa
+        </a>
+        <a asp-controller="AdminDeTai" asp-action="Manage" class="btn btn-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>Quay lại
+        </a>
+    </div>
 </div>
 
 @if (TempData["Success"] != null)
@@ -18,35 +34,32 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 }
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
 
 <div class="row">
-    <!-- Thông tin đề tài -->
     <div class="col-lg-8">
+        <!-- Thông tin đề tài -->
         <div class="card shadow mb-4">
             <div class="card-header py-3 d-flex justify-content-between align-items-center">
                 <h6 class="m-0 font-weight-bold text-primary">Thông tin đề tài</h6>
-                @{
-                    var badgeClass = Model.TrangThai switch {
-                        "Chờ duyệt"      => "bg-warning text-dark",
-                        "Đã duyệt"       => "bg-success",
-                        "Đang thực hiện" => "bg-info",
-                        "Hoàn thành"     => "bg-primary",
-                        "Bị từ chối"     => "bg-danger",
-                        _                => "bg-secondary"
-                    };
-                }
                 <span class="badge @badgeClass fs-6">@Model.TrangThai</span>
             </div>
             <div class="card-body">
                 <dl class="row mb-0">
                     <dt class="col-sm-4">Mã đề tài</dt>
-                    <dd class="col-sm-8">@Model.MaDeTai</dd>
+                    <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.MaDeTai) ? "—" : Model.MaDeTai)</dd>
 
                     <dt class="col-sm-4">Tên đề tài</dt>
                     <dd class="col-sm-8 fw-bold">@Model.TenDeTai</dd>
 
                     <dt class="col-sm-4">Loại</dt>
-                    <dd class="col-sm-8">@Model.LoaiDeTai</dd>
+                    <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.LoaiDeTai) ? "—" : Model.LoaiDeTai)</dd>
 
                     <dt class="col-sm-4">Mô tả</dt>
                     <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.MoTaDeTai) ? "—" : Model.MoTaDeTai)</dd>
@@ -59,45 +72,78 @@
 
                     <dt class="col-sm-4">Đợt đồ án</dt>
                     <dd class="col-sm-8">@(Model.DotDoAn?.TenDot ?? "—")</dd>
+
+                    <dt class="col-sm-4">Ngày tạo</dt>
+                    <dd class="col-sm-8">@Model.NgayTao.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                    @if (Model.NgayDuyet.HasValue)
+                    {
+                        <dt class="col-sm-4">Ngày duyệt</dt>
+                        <dd class="col-sm-8">@Model.NgayDuyet.Value.ToString("dd/MM/yyyy HH:mm")</dd>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.LyDoTuChoi))
+                    {
+                        <dt class="col-sm-4 text-danger">Lý do từ chối</dt>
+                        <dd class="col-sm-8 text-danger">@Model.LyDoTuChoi</dd>
+                    }
                 </dl>
             </div>
         </div>
 
-        <!-- Nộp bài -->
-        @if (!string.IsNullOrEmpty(Model.FileBaoCao) || !string.IsNullOrEmpty(Model.LinkGitHub))
-        {
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Tài nguyên nộp</h6>
-                </div>
-                <div class="card-body">
+        <!-- 13. File báo cáo -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-file-alt me-2"></i>File báo cáo & Tài nguyên</h6>
+            </div>
+            <div class="card-body">
+                @if (string.IsNullOrEmpty(Model.FileBaoCao) && string.IsNullOrEmpty(Model.LinkGitHub) &&
+                     string.IsNullOrEmpty(Model.FileSlide) && string.IsNullOrEmpty(Model.FileSourceCode) &&
+                     string.IsNullOrEmpty(Model.LinkDemo))
+                {
+                    <p class="text-muted mb-0"><i class="fas fa-info-circle me-1"></i>Chưa có tài nguyên nào được nộp.</p>
+                }
+                else
+                {
                     <dl class="row mb-0">
                         @if (!string.IsNullOrEmpty(Model.FileBaoCao))
                         {
-                            <dt class="col-sm-4">Báo cáo</dt>
+                            <dt class="col-sm-4"><i class="fas fa-file-pdf me-1 text-danger"></i>Báo cáo</dt>
                             <dd class="col-sm-8"><a href="@Model.FileBaoCao" target="_blank">@Model.FileBaoCao</a></dd>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.FileSlide))
+                        {
+                            <dt class="col-sm-4"><i class="fas fa-file-powerpoint me-1 text-warning"></i>Slide</dt>
+                            <dd class="col-sm-8"><a href="@Model.FileSlide" target="_blank">@Model.FileSlide</a></dd>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.FileSourceCode))
+                        {
+                            <dt class="col-sm-4"><i class="fas fa-file-code me-1 text-info"></i>Source code</dt>
+                            <dd class="col-sm-8"><a href="@Model.FileSourceCode" target="_blank">@Model.FileSourceCode</a></dd>
                         }
                         @if (!string.IsNullOrEmpty(Model.LinkGitHub))
                         {
-                            <dt class="col-sm-4">GitHub</dt>
+                            <dt class="col-sm-4"><i class="fab fa-github me-1"></i>GitHub</dt>
                             <dd class="col-sm-8"><a href="@Model.LinkGitHub" target="_blank">@Model.LinkGitHub</a></dd>
                         }
                         @if (!string.IsNullOrEmpty(Model.LinkDemo))
                         {
-                            <dt class="col-sm-4">Demo</dt>
+                            <dt class="col-sm-4"><i class="fas fa-external-link-alt me-1 text-success"></i>Demo</dt>
                             <dd class="col-sm-8"><a href="@Model.LinkDemo" target="_blank">@Model.LinkDemo</a></dd>
                         }
                     </dl>
-                </div>
+                }
             </div>
-        }
+        </div>
 
-        <!-- Tiến độ -->
+        <!-- 12. Tiến độ + 14. Nhận xét giảng viên -->
         @if (Model.TienDos.Any())
         {
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Tiến độ (@Model.TienDos.Count mục)</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-tasks me-2"></i>Tiến độ (@Model.TienDos.Count mục)
+                    </h6>
                 </div>
                 <div class="card-body p-0">
                     <table class="table table-sm mb-0">
@@ -106,18 +152,38 @@
                                 <th>Công việc</th>
                                 <th>Ngày cập nhật</th>
                                 <th>Hoàn thành</th>
+                                <th>Nhận xét GV</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var td in Model.TienDos.OrderByDescending(t => t.NgayCapNhat))
                             {
                                 <tr>
-                                    <td>@td.TenCongViec</td>
-                                    <td><small>@td.NgayCapNhat.ToString("dd/MM/yyyy")</small></td>
                                     <td>
+                                        <div class="fw-bold">@td.TenCongViec</div>
+                                        @if (!string.IsNullOrEmpty(td.NoiDungDaLam))
+                                        {
+                                            <small class="text-muted">@td.NoiDungDaLam</small>
+                                        }
+                                    </td>
+                                    <td><small>@td.NgayCapNhat.ToString("dd/MM/yyyy")</small></td>
+                                    <td style="min-width:100px">
                                         <div class="progress" style="height:18px;">
-                                            <div class="progress-bar" style="width:@td.PhanTramHoanThanh%">@td.PhanTramHoanThanh%</div>
+                                            <div class="progress-bar @(td.PhanTramHoanThanh == 100 ? "bg-success" : "")"
+                                                 style="width:@td.PhanTramHoanThanh%">
+                                                @td.PhanTramHoanThanh%
+                                            </div>
                                         </div>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(td.NhanXetCuaGiangVien))
+                                        {
+                                            <span class="text-success"><i class="fas fa-comment me-1"></i>@td.NhanXetCuaGiangVien</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">Chưa có nhận xét</span>
+                                        }
                                     </td>
                                 </tr>
                             }
@@ -128,21 +194,22 @@
         }
     </div>
 
-    <!-- Sidebar: người liên quan + hành động -->
     <div class="col-lg-4">
+        <!-- Người liên quan -->
         <div class="card shadow mb-4">
             <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">Người liên quan</h6>
             </div>
             <div class="card-body">
                 <p class="mb-1"><strong><i class="fas fa-user-graduate me-1"></i>Sinh viên:</strong></p>
-                <p class="ms-3">@(Model.SinhVien?.HoTen ?? "Chưa có")</p>
+                <p class="ms-3 mb-3">@(Model.SinhVien?.HoTen ?? "Chưa có")</p>
 
                 <p class="mb-1"><strong><i class="fas fa-chalkboard-user me-1"></i>Giảng viên HD:</strong></p>
-                <p class="ms-3">
+                <p class="ms-3 mb-3">
                     @if (Model.GiangVien != null)
                     {
                         @Model.GiangVien.HoTen
+                        <br /><small class="text-muted">@Model.GiangVien.BoMon</small>
                     }
                     else
                     {
@@ -153,12 +220,12 @@
                 @if (Model.HoiDong != null)
                 {
                     <p class="mb-1"><strong><i class="fas fa-users-viewfinder me-1"></i>Hội đồng:</strong></p>
-                    <p class="ms-3">@Model.HoiDong.TenHoiDong</p>
+                    <p class="ms-3 mb-0">@Model.HoiDong.TenHoiDong</p>
                 }
             </div>
         </div>
 
-        <!-- Điểm -->
+        <!-- Điểm số -->
         @if (Model.DiemHuongDan.HasValue || Model.DiemPhanBien.HasValue || Model.DiemHoiDong.HasValue)
         {
             <div class="card shadow mb-4">
@@ -178,7 +245,7 @@
             </div>
         }
 
-        <!-- Hành động duyệt -->
+        <!-- 11. Duyệt / Từ chối -->
         @if (Model.TrangThai == "Chờ duyệt")
         {
             <div class="card shadow mb-4 border-warning">
@@ -193,15 +260,54 @@
                             <i class="fas fa-check me-1"></i>Duyệt đề tài
                         </button>
                     </form>
-                    <form asp-controller="AdminDeTai" asp-action="TuChoiDeTai" asp-route-id="@Model.Id" method="post">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-danger w-100"
-                                onclick="return confirm('Từ chối đề tài này?')">
-                            <i class="fas fa-times me-1"></i>Từ chối
-                        </button>
-                    </form>
+                    <button type="button" class="btn btn-danger w-100" data-bs-toggle="collapse"
+                            data-bs-target="#formTuChoi">
+                        <i class="fas fa-times me-1"></i>Từ chối
+                    </button>
+                    <div class="collapse" id="formTuChoi">
+                        <form asp-controller="AdminDeTai" asp-action="TuChoiDeTai" asp-route-id="@Model.Id" method="post">
+                            @Html.AntiForgeryToken()
+                            <textarea name="lyDoTuChoi" class="form-control mb-2" rows="3"
+                                      placeholder="Nhập lý do từ chối (bắt buộc)..." required></textarea>
+                            <button type="submit" class="btn btn-danger w-100">Xác nhận từ chối</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         }
+
+        <!-- 15. Cập nhật trạng thái -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-sync me-1"></i>Cập nhật trạng thái</h6>
+            </div>
+            <div class="card-body">
+                <form asp-controller="AdminDeTai" asp-action="CapNhatTrangThai" asp-route-id="@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
+                    <select name="trangThaiMoi" class="form-select form-select-sm mb-2">
+                        @foreach (var tt in danhSachTrangThai)
+                        {
+                            <option value="@tt" selected="@(Model.TrangThai == tt ? "selected" : null)">@tt</option>
+                        }
+                    </select>
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="fas fa-save me-1"></i>Cập nhật
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Xóa mềm -->
+        <div class="card shadow mb-4 border-danger">
+            <div class="card-body">
+                <form asp-controller="AdminDeTai" asp-action="Delete" asp-route-id="@Model.Id" method="post"
+                      onsubmit="return confirm('Xóa đề tài này? Nếu đã có dữ liệu liên quan sẽ xóa mềm.')">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                        <i class="fas fa-trash me-1"></i>Xóa đề tài
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
 </div>

@@ -65,9 +65,13 @@ public class DeTai
     public string MoTaDeTai { get; set; } = string.Empty;
     public string LoaiDeTai { get; set; } = string.Empty; // Đồ án, Luận văn
     public string CongNgheSuDung { get; set; } = string.Empty;
-    public string TrangThai { get; set; } = string.Empty; // Chờ duyệt, Đã duyệt, ...
+    public string TrangThai { get; set; } = "Chờ duyệt"; // Chờ duyệt, Đã duyệt, Bị từ chối, Đang thực hiện, Yêu cầu chỉnh sửa, Đã nộp báo cáo, Đã hoàn thành, Đã hủy
     public DateTime NgayBatDau { get; set; }
     public DateTime NgayKetThuc { get; set; }
+    public DateTime NgayTao { get; set; } = DateTime.Now;
+    public DateTime? NgayDuyet { get; set; }
+    public string LyDoTuChoi { get; set; } = string.Empty;
+    public bool IsDeleted { get; set; } = false;
 
     public int? SinhVienId { get; set; }
     public SinhVien? SinhVien { get; set; }

@@ -1,11 +1,14 @@
 @model IEnumerable<QuanLyDoAn.Models.DeTai>
-
 @{
     ViewData["Title"] = "Quản lý Đề Tài";
+    var danhSachTrangThai = ViewBag.DanhSachTrangThai as string[] ?? Array.Empty<string>();
 }
 
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-list-check me-2"></i>Quản lý Đề Tài</h1>
+    <h1 class="h3 mb-0"><i class="fas fa-list-check me-2"></i>Quản lý Đề Tài</h1>
+    <a asp-controller="AdminDeTai" asp-action="Create" class="btn btn-primary btn-sm">
+        <i class="fas fa-plus me-1"></i>Thêm đề tài
+    </a>
 </div>
 
 @if (TempData["Success"] != null)
@@ -15,28 +18,42 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 }
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
 
-<!-- Filter -->
+<!-- Bộ lọc -->
 <div class="card shadow mb-4">
     <div class="card-body py-3">
         <form method="get" class="row g-2 align-items-end">
             <div class="col-md-3">
-                <label class="form-label small fw-bold">Từ khóa</label>
-                <input type="text" name="keyword" value="@ViewBag.Keyword" class="form-control form-control-sm" placeholder="Tên hoặc mã đề tài..." />
+                <label class="form-label small fw-bold">Tìm kiếm</label>
+                <input type="text" name="keyword" value="@ViewBag.Keyword" class="form-control form-control-sm"
+                       placeholder="Tên, mã, sinh viên, giảng viên..." />
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label class="form-label small fw-bold">Trạng thái</label>
                 <select name="trangThai" class="form-select form-select-sm">
                     <option value="">-- Tất cả --</option>
-                    @foreach (var tt in new[] { "Chờ duyệt", "Đã duyệt", "Đang thực hiện", "Hoàn thành", "Bị từ chối" })
+                    @foreach (var tt in danhSachTrangThai)
                     {
                         <option value="@tt" selected="@(ViewBag.TrangThaiFilter == tt ? "selected" : null)">@tt</option>
                     }
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label class="form-label small fw-bold">Đợt đồ án</label>
                 <select name="dotDoAnId" class="form-select form-select-sm" asp-items="ViewBag.DotDoAnList">
+                    <option value="">-- Tất cả --</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-bold">Giảng viên HD</label>
+                <select name="giangVienId" class="form-select form-select-sm" asp-items="ViewBag.GiangVienList">
                     <option value="">-- Tất cả --</option>
                 </select>
             </div>
@@ -55,12 +72,12 @@
     <div class="card-body">
         @if (!Model.Any())
         {
-            <div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>Không có đề tài nào.</div>
+            <div class="alert alert-info mb-0"><i class="fas fa-info-circle me-2"></i>Không có đề tài nào.</div>
         }
         else
         {
             <div class="table-responsive">
-                <table class="table table-bordered table-hover">
+                <table class="table table-bordered table-hover align-middle">
                     <thead class="table-light">
                         <tr>
                             <th>Mã ĐT</th>
@@ -69,7 +86,8 @@
                             <th>Giảng viên HD</th>
                             <th>Đợt</th>
                             <th>Trạng thái</th>
-                            <th>Thao tác</th>
+                            <th>Ngày tạo</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -82,32 +100,46 @@
                                 <td>
                                     @if (dt.GiangVien != null)
                                     {
-                                        <span>@dt.GiangVien.HoTen</span>
+                                        @dt.GiangVien.HoTen
                                     }
                                     else
                                     {
-                                        <span class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i>Chưa phân công</span>
+                                        <span class="text-danger small"><i class="fas fa-exclamation-triangle me-1"></i>Chưa phân công</span>
                                     }
                                 </td>
                                 <td><small>@(dt.DotDoAn?.TenDot ?? "—")</small></td>
                                 <td>
                                     @{
-                                        var badgeClass = dt.TrangThai switch {
-                                            "Chờ duyệt"       => "bg-warning text-dark",
-                                            "Đã duyệt"        => "bg-success",
-                                            "Đang thực hiện"  => "bg-info",
-                                            "Hoàn thành"      => "bg-primary",
-                                            "Bị từ chối"      => "bg-danger",
-                                            _                 => "bg-secondary"
+                                        var bc = dt.TrangThai switch {
+                                            "Chờ duyệt"          => "bg-warning text-dark",
+                                            "Đã duyệt"           => "bg-success",
+                                            "Bị từ chối"         => "bg-danger",
+                                            "Đang thực hiện"     => "bg-info",
+                                            "Yêu cầu chỉnh sửa" => "bg-warning",
+                                            "Đã nộp báo cáo"     => "bg-primary",
+                                            "Đã hoàn thành"      => "bg-success",
+                                            "Đã hủy"             => "bg-secondary",
+                                            _                    => "bg-secondary"
                                         };
                                     }
-                                    <span class="badge @badgeClass">@dt.TrangThai</span>
+                                    <span class="badge @bc">@dt.TrangThai</span>
                                 </td>
+                                <td><small>@dt.NgayTao.ToString("dd/MM/yyyy")</small></td>
                                 <td>
-                                    <a asp-controller="AdminDeTai" asp-action="Details" asp-route-id="@dt.Id"
-                                       class="btn btn-sm btn-info" title="Chi tiết">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-controller="AdminDeTai" asp-action="Details" asp-route-id="@dt.Id"
+                                           class="btn btn-info" title="Chi tiết"><i class="fas fa-eye"></i></a>
+                                        <a asp-controller="AdminDeTai" asp-action="Edit" asp-route-id="@dt.Id"
+                                           class="btn btn-warning" title="Sửa"><i class="fas fa-edit"></i></a>
+                                        <form asp-controller="AdminDeTai" asp-action="Delete" asp-route-id="@dt.Id"
+                                              method="post" class="d-inline"
+                                              onsubmit="return confirm('Xóa đề tài này?')">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-danger" title="Xóa">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         }
