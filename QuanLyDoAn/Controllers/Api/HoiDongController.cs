@@ -20,9 +20,8 @@ public class HoiDongController : ControllerBase
     public async Task<ActionResult<IEnumerable<HoiDong>>> GetHoiDongs()
     {
         return await _context.HoiDongs
-            .Include(h => h.ChuTich)
-            .Include(h => h.ThuKy)
-            .Include(h => h.UyVien)
+            .Include(h => h.ThanhViens).ThenInclude(tv => tv.GiangVien)
+            .Where(h => !h.IsDeleted)
             .ToListAsync();
     }
 
@@ -31,7 +30,6 @@ public class HoiDongController : ControllerBase
     {
         _context.HoiDongs.Add(hoiDong);
         await _context.SaveChangesAsync();
-
         return Ok(hoiDong);
     }
 }
