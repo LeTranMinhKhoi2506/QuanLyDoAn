@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using QuanLyDoAn.Data;
 using System.Security.Claims;
 
-namespace QuanLyDoAn.Controllers.GiangVien;
+namespace QuanLyDoAn.Controllers.Admin;
 
 [Authorize(Roles = "Giảng viên")]
 public class GVController : Controller
