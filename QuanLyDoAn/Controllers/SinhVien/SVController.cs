@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using QuanLyDoAn.Data;
 using System.Security.Claims;
 
-namespace QuanLyDoAn.Controllers.SinhVien;
+namespace QuanLyDoAn.Controllers.Admin;
 
 [Authorize(Roles = "Sinh viên")]
 public class SVController : Controller
@@ -41,7 +41,8 @@ public class SVController : Controller
 
         if (deTai == null)
         {
-            return Json(new {
+            return Json(new
+            {
                 hasDeTai = false
             });
         }
@@ -56,7 +57,8 @@ public class SVController : Controller
             .Select(t => t.NhanXetCuaGiangVien)
             .FirstOrDefault();
 
-        return Json(new {
+        return Json(new
+        {
             hasDeTai = true,
             tenDeTai = deTai.TenDeTai,
             giangVienHuongDan = deTai.GiangVien?.HoTen ?? "Chưa phân công",
