@@ -183,17 +183,62 @@ public class HoiDong
 {
     public int Id { get; set; }
     public string TenHoiDong { get; set; } = string.Empty;
-    public DateTime NgayBaoVe { get; set; }
-    public string PhongBaoVe { get; set; } = string.Empty;
+    public string? MoTa { get; set; } = string.Empty;
+    public bool DaKhoa { get; set; } = false;
+    public bool IsDeleted { get; set; } = false;
+    public DateTime NgayTao { get; set; } = DateTime.Now;
 
-    public int? ChuTichId { get; set; }
-    public GiangVien? ChuTich { get; set; }
+    public int? DotDoAnId { get; set; }
+    public DotDoAn? DotDoAn { get; set; }
 
-    public int? ThuKyId { get; set; }
-    public GiangVien? ThuKy { get; set; }
-
-    public int? UyVienId { get; set; }
-    public GiangVien? UyVien { get; set; }
-
+    public ICollection<HoiDongThanhVien> ThanhViens { get; set; } = new List<HoiDongThanhVien>();
     public ICollection<DeTai> DeTaisDuocCham { get; set; } = new List<DeTai>();
+    public ICollection<LichBaoVe> LichBaoVes { get; set; } = new List<LichBaoVe>();
+}
+
+public class HoiDongThanhVien
+{
+    public int Id { get; set; }
+    public string VaiTro { get; set; } = string.Empty; // Chủ tịch, Thư ký, Ủy viên, Phản biện
+
+    public int HoiDongId { get; set; }
+    public HoiDong HoiDong { get; set; } = null!;
+
+    public int GiangVienId { get; set; }
+    public GiangVien GiangVien { get; set; } = null!;
+}
+
+public class LichBaoVe
+{
+    public int Id { get; set; }
+    public DateTime ThoiGianBaoVe { get; set; }
+    public string PhongBaoVe { get; set; } = string.Empty;
+    public string GhiChu { get; set; } = string.Empty;
+
+    public int HoiDongId { get; set; }
+    public HoiDong HoiDong { get; set; } = null!;
+
+    public int DeTaiId { get; set; }
+    public DeTai DeTai { get; set; } = null!;
+}
+
+public class DiemHoiDong
+{
+    public int Id { get; set; }
+    public double DiemBaoCao { get; set; }      // 30%
+    public double DiemThuyetTrinh { get; set; } // 20%
+    public double DiemSanPham { get; set; }     // 30%
+    public double DiemTraLoiCauHoi { get; set; }// 20%
+    public double DiemTong => DiemBaoCao * 0.3 + DiemThuyetTrinh * 0.2 + DiemSanPham * 0.3 + DiemTraLoiCauHoi * 0.2;
+    public string NhanXet { get; set; } = string.Empty;
+    public DateTime NgayNhap { get; set; } = DateTime.Now;
+
+    public int DeTaiId { get; set; }
+    public DeTai DeTai { get; set; } = null!;
+
+    public int GiangVienId { get; set; }
+    public GiangVien GiangVien { get; set; } = null!;
+
+    public int HoiDongId { get; set; }
+    public HoiDong HoiDong { get; set; } = null!;
 }

@@ -1,0 +1,85 @@
+@model IEnumerable<QuanLyDoAn.Models.HoiDong>
+@{ ViewData["Title"] = "Quản lý Hội Đồng"; }
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-users-viewfinder me-2"></i>Quản lý Hội Đồng</h1>
+        <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Thêm hội đồng</a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>Chưa có hội đồng nào.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Tên hội đồng</th>
+                                <th>Đợt đồ án</th>
+                                <th>Số thành viên</th>
+                                <th>Số đề tài</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var hd in Model)
+                            {
+                                <tr>
+                                    <td class="fw-bold">@hd.TenHoiDong</td>
+                                    <td>@(hd.DotDoAn?.TenDot ?? "—")</td>
+                                    <td class="text-center"><span class="badge bg-info">@hd.ThanhViens.Count</span></td>
+                                    <td class="text-center"><span class="badge bg-primary">@hd.DeTaisDuocCham.Count</span></td>
+                                    <td>
+                                        @if (hd.DaKhoa)
+                                        {
+                                            <span class="badge bg-dark"><i class="fas fa-lock me-1"></i>Đã khóa</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">Đang hoạt động</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a asp-action="Details" asp-route-id="@hd.Id" class="btn btn-info" title="Chi tiết"><i class="fas fa-eye"></i></a>
+                                            @if (!hd.DaKhoa)
+                                            {
+                                                <a asp-action="Edit" asp-route-id="@hd.Id" class="btn btn-warning" title="Sửa"><i class="fas fa-edit"></i></a>
+                                                <form asp-action="Delete" asp-route-id="@hd.Id" method="post" class="d-inline"
+                                                      onsubmit="return confirm('Xóa hội đồng này?')">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-danger" title="Xóa"><i class="fas fa-trash"></i></button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

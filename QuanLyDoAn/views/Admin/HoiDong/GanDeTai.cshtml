@@ -1,0 +1,58 @@
+@model IEnumerable<QuanLyDoAn.Models.DeTai>
+@{ ViewData["Title"] = "Gán Đề Tài Vào Hội Đồng"; var hd = (QuanLyDoAn.Models.HoiDong)ViewBag.HoiDong; }
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-link me-2"></i>Gán Đề Tài: @hd.TenHoiDong</h1>
+        <a asp-action="Details" asp-route-id="@hd.Id" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Quay lại</a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">@TempData["Success"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">@TempData["Error"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    }
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Đề tài có thể gán (cùng đợt, đã nộp báo cáo/hoàn thành, chưa gán hội đồng)</h6>
+        </div>
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>Không có đề tài nào phù hợp để gán.</div>
+            }
+            else
+            {
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr><th>Mã đề tài</th><th>Tên đề tài</th><th>Sinh viên</th><th>GVHD</th><th>Trạng thái</th><th>Thao tác</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var dt in Model)
+                        {
+                            <tr>
+                                <td>@dt.MaDeTai</td>
+                                <td>@dt.TenDeTai</td>
+                                <td>@dt.SinhVien?.HoTen</td>
+                                <td>@dt.GiangVien?.HoTen</td>
+                                <td><span class="badge bg-success">@dt.TrangThai</span></td>
+                                <td>
+                                    <form asp-action="GanDeTaiPost" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="hoiDongId" value="@hd.Id" />
+                                        <input type="hidden" name="deTaiId" value="@dt.Id" />
+                                        <button type="submit" class="btn btn-sm btn-success"><i class="fas fa-plus me-1"></i>Gán</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>

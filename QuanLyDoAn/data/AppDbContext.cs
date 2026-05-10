@@ -18,6 +18,9 @@ public class AppDbContext : DbContext
     public DbSet<ThongBao> ThongBaos { get; set; } = null!;
     public DbSet<DotDoAn> DotDoAns { get; set; } = null!;
     public DbSet<HoiDong> HoiDongs { get; set; } = null!;
+    public DbSet<HoiDongThanhVien> HoiDongThanhViens { get; set; } = null!;
+    public DbSet<LichBaoVe> LichBaoVes { get; set; } = null!;
+    public DbSet<DiemHoiDong> DiemHoiDongs { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -72,18 +75,46 @@ public class AppDbContext : DbContext
             .HasForeignKey(d => d.HoiDongId);
 
         modelBuilder.Entity<HoiDong>()
-            .HasOne(hd => hd.ChuTich)
+            .HasOne(hd => hd.DotDoAn)
             .WithMany()
-            .HasForeignKey(hd => hd.ChuTichId);
+            .HasForeignKey(hd => hd.DotDoAnId);
 
-        modelBuilder.Entity<HoiDong>()
-            .HasOne(hd => hd.ThuKy)
-            .WithMany()
-            .HasForeignKey(hd => hd.ThuKyId);
+        modelBuilder.Entity<HoiDongThanhVien>()
+            .HasOne(tv => tv.HoiDong)
+            .WithMany(hd => hd.ThanhViens)
+            .HasForeignKey(tv => tv.HoiDongId);
 
-        modelBuilder.Entity<HoiDong>()
-            .HasOne(hd => hd.UyVien)
+        modelBuilder.Entity<HoiDongThanhVien>()
+            .HasOne(tv => tv.GiangVien)
             .WithMany()
-            .HasForeignKey(hd => hd.UyVienId);
+            .HasForeignKey(tv => tv.GiangVienId);
+
+        modelBuilder.Entity<LichBaoVe>()
+            .HasOne(l => l.HoiDong)
+            .WithMany(hd => hd.LichBaoVes)
+            .HasForeignKey(l => l.HoiDongId);
+
+        modelBuilder.Entity<LichBaoVe>()
+            .HasOne(l => l.DeTai)
+            .WithMany()
+            .HasForeignKey(l => l.DeTaiId);
+
+        modelBuilder.Entity<DiemHoiDong>()
+            .HasOne(d => d.DeTai)
+            .WithMany()
+            .HasForeignKey(d => d.DeTaiId);
+
+        modelBuilder.Entity<DiemHoiDong>()
+            .HasOne(d => d.GiangVien)
+            .WithMany()
+            .HasForeignKey(d => d.GiangVienId);
+
+        modelBuilder.Entity<DiemHoiDong>()
+            .HasOne(d => d.HoiDong)
+            .WithMany()
+            .HasForeignKey(d => d.HoiDongId);
+
+        modelBuilder.Entity<DiemHoiDong>()
+            .Ignore(d => d.DiemTong);
     }
 }

@@ -1,0 +1,135 @@
+@model QuanLyDoAn.Models.HoiDong
+@{
+    ViewData["Title"] = "Nhập Điểm Hội Đồng";
+    var dsDiem = (IEnumerable<QuanLyDoAn.Models.DiemHoiDong>)ViewBag.DsDiem;
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-marker me-2"></i>Nhập Điểm: @Model.TenHoiDong</h1>
+        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Quay lại</a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">@TempData["Success"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">@TempData["Error"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    }
+
+    <div class="alert alert-info small">
+        <strong>Công thức tính điểm:</strong>
+        Điểm tổng = Báo cáo × 30% + Thuyết trình × 20% + Sản phẩm × 30% + Trả lời câu hỏi × 20%
+    </div>
+
+    @if (!Model.DeTaisDuocCham.Any())
+    {
+        <div class="alert alert-warning">Chưa có đề tài nào được gán vào hội đồng.</div>
+    }
+    else
+    {
+        @foreach (var dt in Model.DeTaisDuocCham)
+        {
+            var lich = Model.LichBaoVes.FirstOrDefault(l => l.DeTaiId == dt.Id);
+            var daBaoVe = lich != null && lich.ThoiGianBaoVe <= DateTime.Now;
+
+            <div class="card shadow mb-4">
+                <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">@dt.MaDeTai - @dt.TenDeTai</span>
+                    <div>
+                        <small class="text-muted me-3">SV: @dt.SinhVien?.HoTen</small>
+                        @if (lich != null)
+                        {
+                            <small class="text-muted">Bảo vệ: @lich.ThoiGianBaoVe.ToString("dd/MM/yyyy HH:mm") - @lich.PhongBaoVe</small>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark">Chưa có lịch bảo vệ</span>
+                        }
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (!daBaoVe)
+                    {
+                        <div class="alert alert-warning mb-0"><i class="fas fa-clock me-1"></i>Chỉ được nhập điểm sau khi đề tài đã bảo vệ.</div>
+                    }
+                    else
+                    {
+                        <ul class="nav nav-tabs mb-3" id="tab-@dt.Id">
+                            @foreach (var tv in Model.ThanhViens)
+                            {
+                                var diem = dsDiem.FirstOrDefault(d => d.DeTaiId == dt.Id && d.GiangVienId == tv.GiangVienId);
+                                <li class="nav-item">
+                                    <a class="nav-link @(Model.ThanhViens.First().Id == tv.Id ? "active" : "")"
+                                       data-bs-toggle="tab" href="#tab-@(dt.Id)-@(tv.GiangVienId)">
+                                        @tv.GiangVien?.HoTen
+                                        <span class="badge @(tv.VaiTro == "Chủ tịch" ? "bg-danger" : "bg-secondary") ms-1">@tv.VaiTro</span>
+                                        @if (diem != null) { <i class="fas fa-check-circle text-success ms-1"></i> }
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                        <div class="tab-content">
+                            @foreach (var tv in Model.ThanhViens)
+                            {
+                                var diem = dsDiem.FirstOrDefault(d => d.DeTaiId == dt.Id && d.GiangVienId == tv.GiangVienId);
+                                <div class="tab-pane fade @(Model.ThanhViens.First().Id == tv.Id ? "show active" : "")"
+                                     id="tab-@(dt.Id)-@(tv.GiangVienId)">
+                                    <form asp-action="LuuDiem" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="hoiDongId" value="@Model.Id" />
+                                        <input type="hidden" name="deTaiId" value="@dt.Id" />
+                                        <input type="hidden" name="giangVienId" value="@tv.GiangVienId" />
+                                        <div class="row g-3">
+                                            <div class="col-md-3">
+                                                <label class="form-label">Báo cáo (30%) <span class="text-danger">*</span></label>
+                                                <input type="number" name="diemBaoCao" class="form-control" min="0" max="10" step="0.1"
+                                                       value="@(diem?.DiemBaoCao.ToString("0.##") ?? "")" required />
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label">Thuyết trình (20%) <span class="text-danger">*</span></label>
+                                                <input type="number" name="diemThuyetTrinh" class="form-control" min="0" max="10" step="0.1"
+                                                       value="@(diem?.DiemThuyetTrinh.ToString("0.##") ?? "")" required />
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label">Sản phẩm (30%) <span class="text-danger">*</span></label>
+                                                <input type="number" name="diemSanPham" class="form-control" min="0" max="10" step="0.1"
+                                                       value="@(diem?.DiemSanPham.ToString("0.##") ?? "")" required />
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label">Trả lời câu hỏi (20%) <span class="text-danger">*</span></label>
+                                                <input type="number" name="diemTraLoiCauHoi" class="form-control" min="0" max="10" step="0.1"
+                                                       value="@(diem?.DiemTraLoiCauHoi.ToString("0.##") ?? "")" required />
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label">Nhận xét</label>
+                                                <textarea name="nhanXet" class="form-control" rows="2">@(diem?.NhanXet ?? "")</textarea>
+                                            </div>
+                                            @if (diem != null)
+                                            {
+                                                <div class="col-12">
+                                                    <div class="alert alert-light border mb-0">
+                                                        <strong>Điểm tổng hiện tại:</strong>
+                                                        <span class="fs-5 fw-bold text-primary ms-2">@diem.DiemTong.ToString("0.##")</span>
+                                                        <small class="text-muted ms-2">(Nhập lúc @diem.NgayNhap.ToString("dd/MM/yyyy HH:mm"))</small>
+                                                    </div>
+                                                </div>
+                                            }
+                                            <div class="col-12">
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fas fa-save me-1"></i>@(diem != null ? "Cập nhật điểm" : "Lưu điểm")
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>
