@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace QuanLyDoAn.Controllers;
+namespace QuanLyDoAn.Controllers.Auth;
 
 [Authorize]
 public class HomeController : Controller

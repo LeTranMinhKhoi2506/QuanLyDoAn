@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using QuanLyDoAn.Data;
 using QuanLyDoAn.Models;
 
-namespace QuanLyDoAn.Controllers;
+namespace QuanLyDoAn.Controllers.Admin;
 
 [Authorize(Roles = "Admin")]
 public class AdminController : Controller
