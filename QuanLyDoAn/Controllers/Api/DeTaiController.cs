@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyDoAn.Data;
 using QuanLyDoAn.Models;
+using QuanLyDoAn.Services;
 
 namespace QuanLyDoAn.Controllers.Api;
 
@@ -10,10 +11,12 @@ namespace QuanLyDoAn.Controllers.Api;
 public class DeTaiController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly NotificationService _notification;
 
-    public DeTaiController(AppDbContext context)
+    public DeTaiController(AppDbContext context, NotificationService notification)
     {
         _context = context;
+        _notification = notification;
     }
 
     // 1. Xem danh sách đề tài
@@ -88,6 +91,13 @@ public class DeTaiController : ControllerBase
         deTai.LinkDemo = dto.LinkDemo ?? deTai.LinkDemo;
 
         await _context.SaveChangesAsync();
+
+        // Thông báo cho giảng viên hướng dẫn khi sinh viên nộp file mới
+        if (!string.IsNullOrEmpty(dto.FileBaoCao) || !string.IsNullOrEmpty(dto.FileSlide) || !string.IsNullOrEmpty(dto.FileSourceCode))
+        {
+            await _notification.ThongBaoChoGiangVien(id, "Sinh viên vừa nộp file mới cho đề tài.");
+        }
+
         return Ok(deTai);
     }
 }

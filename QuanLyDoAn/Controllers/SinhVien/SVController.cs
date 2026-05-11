@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyDoAn.Data;
+using QuanLyDoAn.Models;
 using System.Security.Claims;
 
 namespace QuanLyDoAn.Controllers.Admin;
@@ -67,5 +68,11 @@ public class SVController : Controller
             hanNop = deTai.DotDoAn?.HanNopBaoCao.ToString("dd/MM/yyyy") ?? "Chưa xác định",
             nhanXetMoiNhat = nhanXetMoiNhat ?? "Chưa có nhận xét nào"
         });
+    }
+
+    // Hiển thị trang thông báo cho sinh viên
+    public IActionResult ThongBao()
+    {
+        return View();
     }
 }

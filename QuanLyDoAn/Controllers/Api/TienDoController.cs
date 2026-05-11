@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyDoAn.Data;
 using QuanLyDoAn.Models;
+using QuanLyDoAn.Services;
 
 namespace QuanLyDoAn.Controllers.Api;
 
@@ -10,10 +11,12 @@ namespace QuanLyDoAn.Controllers.Api;
 public class TienDoController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly NotificationService _notification;
 
-    public TienDoController(AppDbContext context)
+    public TienDoController(AppDbContext context, NotificationService notification)
     {
         _context = context;
+        _notification = notification;
     }
 
     [HttpGet("detai/{deTaiId}")]
@@ -32,6 +35,7 @@ public class TienDoController : ControllerBase
         tienDo.NgayCapNhat = DateTime.UtcNow;
         _context.TienDos.Add(tienDo);
         await _context.SaveChangesAsync();
+        await _notification.ThongBaoChoGiangVien(tienDo.DeTaiId, "Sinh viên vừa cập nhật tiến độ mới.");
 
         return CreatedAtAction(nameof(GetTienDoCuaDeTai), new { deTaiId = tienDo.DeTaiId }, tienDo);
     }
@@ -45,6 +49,7 @@ public class TienDoController : ControllerBase
 
         tienDo.NhanXetCuaGiangVien = nhanXet;
         await _context.SaveChangesAsync();
+        await _notification.ThongBaoNhanXet(tienDo.DeTaiId);
 
         return NoContent();
     }

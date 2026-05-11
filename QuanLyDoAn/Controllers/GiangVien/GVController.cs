@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyDoAn.Data;
+using QuanLyDoAn.Models;
 using System.Security.Claims;
 
 namespace QuanLyDoAn.Controllers.Admin;
@@ -55,5 +56,11 @@ public class GVController : Controller
             soBaoCaoCanNhanXet = soTienDoMoi, // Có thể bằng nhau tùy logic
             dtHoanThanh
         });
+    }
+
+    // Hiển thị trang thông báo cho giảng viên
+    public IActionResult ThongBao()
+    {
+        return View();
     }
 }
