@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyDoAn.Data;
 using QuanLyDoAn.Models;
+using QuanLyDoAn.Services;
 
 namespace QuanLyDoAn.Controllers.Admin;
 
@@ -10,10 +11,12 @@ namespace QuanLyDoAn.Controllers.Admin;
 public class AdminHoiDongController : Controller
 {
     private readonly AppDbContext _context;
+    private readonly NotificationService _notification;
 
-    public AdminHoiDongController(AppDbContext context)
+    public AdminHoiDongController(AppDbContext context, NotificationService notification)
     {
         _context = context;
+        _notification = notification;
     }
 
     // 1. Danh sách hội đồng
@@ -192,6 +195,8 @@ public class AdminHoiDongController : Controller
             VaiTro = vaiTro
         });
         await _context.SaveChangesAsync();
+        await _notification.ThongBaoThemVaoHoiDong(giangVienId, hd.TenHoiDong);
+        await _notification.ThongBaoHoiDongThayDoi(hoiDongId, $"Hội đồng \"{hd.TenHoiDong}\" vừa có thành viên mới.");
 
         TempData["Success"] = "Thêm thành viên thành công";
         return RedirectToAction(nameof(QuanLyThanhVien), new { id = hoiDongId });
@@ -210,6 +215,7 @@ public class AdminHoiDongController : Controller
 
         _context.HoiDongThanhViens.Remove(tv);
         await _context.SaveChangesAsync();
+        await _notification.ThongBaoHoiDongThayDoi(hoiDongId, $"Thành phần hội đồng vừa được thay đổi.");
 
         TempData["Success"] = "Đã xóa thành viên";
         return RedirectToAction(nameof(QuanLyThanhVien), new { id = hoiDongId });
@@ -363,6 +369,10 @@ public class AdminHoiDongController : Controller
         }
 
         await _context.SaveChangesAsync();
+        var savedLich = await _context.LichBaoVes
+            .FirstOrDefaultAsync(l => l.HoiDongId == hoiDongId && l.DeTaiId == deTaiId);
+        if (savedLich != null)
+            await _notification.ThongBaoLichBaoVe(savedLich.Id);
         TempData["Success"] = "Đã lưu lịch bảo vệ";
         return RedirectToAction(nameof(LichBaoVe), new { id = hoiDongId });
     }

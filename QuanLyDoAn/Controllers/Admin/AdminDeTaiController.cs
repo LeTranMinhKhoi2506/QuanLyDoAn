@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QuanLyDoAn.Data;
 using QuanLyDoAn.Models;
+using QuanLyDoAn.Services;
 
 namespace QuanLyDoAn.Controllers.Admin;
 
@@ -11,8 +12,13 @@ namespace QuanLyDoAn.Controllers.Admin;
 public class AdminDeTaiController : Controller
 {
     private readonly AppDbContext _context;
+    private readonly NotificationService _notification;
 
-    public AdminDeTaiController(AppDbContext context) => _context = context;
+    public AdminDeTaiController(AppDbContext context, NotificationService notification)
+    {
+        _context = context;
+        _notification = notification;
+    }
 
     private static readonly string[] DanhSachTrangThai =
     [
@@ -235,6 +241,7 @@ public class AdminDeTaiController : Controller
         deTai.TrangThai = "Đã duyệt";
         deTai.NgayDuyet = DateTime.Now;
         await _context.SaveChangesAsync();
+        await _notification.ThongBaoDeTai(id, $"Đề tài \"{deTai.TenDeTai}\" của bạn đã được duyệt.");
 
         TempData["Success"] = "Đã duyệt đề tài thành công";
         return RedirectToAction(nameof(Details), new { id });
@@ -262,6 +269,7 @@ public class AdminDeTaiController : Controller
         deTai.TrangThai = "Bị từ chối";
         deTai.LyDoTuChoi = lyDoTuChoi;
         await _context.SaveChangesAsync();
+        await _notification.ThongBaoDeTai(id, $"Đề tài \"{deTai.TenDeTai}\" của bạn đã bị từ chối. Lý do: {lyDoTuChoi}");
 
         TempData["Success"] = "Đã từ chối đề tài";
         return RedirectToAction(nameof(Details), new { id });

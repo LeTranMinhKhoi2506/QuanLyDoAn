@@ -1,0 +1,159 @@
+@{
+    ViewData["Title"] = "Thông báo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="fa-solid fa-bell me-2"></i>Thông báo của bạn</h5>
+    </div>
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <span id="unread-count" class="badge bg-danger fs-6"></span>
+            <button id="mark-all-read" class="btn btn-sm btn-outline-primary" style="display: none;">
+                <i class="fa-solid fa-check-double me-1"></i> Đánh dấu tất cả đã đọc
+            </button>
+        </div>
+        
+        <div id="loading" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+        
+        <div id="thong-bao-list" class="list-group list-group-flush">
+            <!-- Notifications will be loaded here -->
+        </div>
+        
+        <div id="empty-state" class="text-center py-5" style="display: none;">
+            <i class="fa-regular fa-bell-slash fa-3x text-muted mb-3"></i>
+            <p class="text-muted">Không có thông báo nào.</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script>
+    $(document).ready(function () {
+        let connection = null;
+        let unreadCount = 0;
+
+        function loadNotifications() {
+            $.getJSON('/api/ThongBao', function(data) {
+                $('#loading').hide();
+                const list = $('#thong-bao-list');
+                list.empty();
+
+                if (data.length === 0) {
+                    $('#empty-state').show();
+                    return;
+                }
+
+                $.each(data, function(i, tb) {
+                    const date = new Date(tb.ngayTao);
+                    const formattedDate = date.toLocaleString('vi-VN');
+                    const readClass = tb.daDoc ? '' : 'bg-light';
+                    const icon = tb.daDoc ? 'fa-bell' : 'fa-bell';
+                    
+                    const item = `
+                        <div class="list-group-item list-group-item-action ${readClass} border-0 border-bottom" data-id="${tb.id}">
+                            <div class="d-flex w-100 justify-content-between">
+                                <div>
+                                    <i class="fa-solid ${icon} me-2 text-${tb.daDoc ? 'secondary' : 'primary'}"></i>
+                                    <span class="fw-bold">${tb.noiDung}</span>
+                                </div>
+                                <small class="text-muted">${formattedDate}</small>
+                            </div>
+                        </div>
+                    `;
+                    list.append(item);
+                });
+
+                updateUnreadCount();
+            }).fail(function() {
+                $('#loading').html('<div class="text-danger">Không thể tải thông báo.</div>');
+            });
+        }
+
+        function updateUnreadCount() {
+            unreadCount = $('.list-group-item:not(.bg-light)').length;
+            const badge = $('#unread-count');
+            badge.text(unreadCount);
+            badge.toggle(unreadCount > 0);
+            
+            $('#mark-all-read').toggle(unreadCount > 0);
+        }
+
+        function markAsRead(id) {
+            $.ajax({
+                url: `/api/ThongBao/${id}/read`,
+                type: 'PUT',
+                success: function() {
+                    const item = $(`[data-id="${id}"]`);
+                    item.removeClass('bg-light');
+                    item.find('i').removeClass('text-primary').addClass('text-secondary');
+                    updateUnreadCount();
+                }
+            });
+        }
+
+        function markAllAsRead() {
+            $.ajax({
+                url: '/api/ThongBao/read-all',
+                type: 'PUT',
+                success: function() {
+                    $('.list-group-item').removeClass('bg-light');
+                    $('.list-group-item i').removeClass('text-primary').addClass('text-secondary');
+                    updateUnreadCount();
+                }
+            });
+        }
+
+        // Click to mark as read
+        $(document).on('click', '.list-group-item', function() {
+            const id = $(this).data('id');
+            if (!$(this).hasClass('bg-light')) {
+                markAsRead(id);
+            }
+        });
+
+        $('#mark-all-read').click(markAllAsRead);
+
+        // Load notifications on page load
+        loadNotifications();
+
+        // Setup SignalR for real-time notifications
+        connection = new signalR.HubConnectionBuilder()
+            .withUrl("/notificationHub")
+            .build();
+
+        connection.on("NhanThongBao", (data) => {
+            // Add new notification to top of list
+            const date = new Date(data.ngayTao);
+            const formattedDate = date.toLocaleString('vi-VN');
+            
+            const item = `
+                <div class="list-group-item list-group-item-action bg-light border-0 border-bottom" data-id="${data.id}">
+                    <div class="d-flex w-100 justify-content-between">
+                        <div>
+                            <i class="fa-solid fa-bell me-2 text-primary"></i>
+                            <span class="fw-bold">${data.noiDung}</span>
+                        </div>
+                        <small class="text-muted">${formattedDate}</small>
+                    </div>
+                </div>
+            `;
+            
+            const list = $('#thong-bao-list');
+            list.prepend(item);
+            list.find('#empty-state').hide();
+            updateUnreadCount();
+        });
+
+        connection.start()
+            .then(() => console.log('SignalR connected'))
+            .catch(err => console.error('SignalR connection error:', err));
+    });
+</script>
+}
