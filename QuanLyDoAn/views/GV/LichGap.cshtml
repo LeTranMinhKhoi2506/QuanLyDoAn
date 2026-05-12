@@ -1,0 +1,105 @@
+@model IEnumerable<QuanLyDoAn.Models.LichGap>
+
+@{
+    ViewData["Title"] = "Lịch Gặp Sinh Viên";
+    Layout = "~/views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fa-solid fa-calendar-check me-2"></i> Lịch Gặp Sinh Viên</h2>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Sinh Viên Đặt Lịch</th>
+                            <th>Ngày Giờ Gặp</th>
+                            <th>Nội Dung</th>
+                            <th>Hình Thức</th>
+                            <th>Trạng Thái</th>
+                            <th class="text-center">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center">Không có lịch hẹn nào</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@item.SinhVien?.HoTen</strong>
+                                        <br />
+                                        <small class="text-muted">(@item.SinhVien?.MaSinhVien)</small>
+                                    </td>
+                                    <td>
+                                        <span class="text-primary fw-bold">@item.NgayGioGap.ToString("dd/MM/yyyy")</span><br />
+                                        <span class="badge bg-secondary">@item.NgayGioGap.ToString("HH:mm")</span>
+                                    </td>
+                                    <td>@item.NoiDung</td>
+                                    <td>
+                                        @if(item.HinhThuc == "Online")
+                                        {
+                                            <span class="badge bg-info text-dark"><i class="fa-solid fa-laptop"></i> Online</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-primary"><i class="fa-solid fa-users"></i> Trực tiếp</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.TrangThai == "Chờ duyệt") {
+                                            <span class="badge bg-warning text-dark">Chờ duyệt</span>
+                                        } else if (item.TrangThai == "Chấp nhận") {
+                                            <span class="badge bg-success">Đã chấp nhận</span>
+                                        } else if (item.TrangThai == "Từ chối") {
+                                            <span class="badge bg-danger">Đã từ chối</span>
+                                        } else {
+                                            <span class="badge bg-secondary">@item.TrangThai</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @if (item.TrangThai == "Chờ duyệt" || item.TrangThai == "Đổi lịch")
+                                        {
+                                            <div class="d-flex justify-content-center gap-2">
+                                                <form asp-action="DuyetLichGap" asp-route-id="@item.Id" method="post">
+                                                    <input type="hidden" name="trangThai" value="Chấp nhận" />
+                                                    <button type="submit" class="btn btn-sm btn-success" title="Chấp nhận">
+                                                        <i class="fa-solid fa-check"></i> Chấp nhận
+                                                    </button>
+                                                </form>
+                                                <form asp-action="DuyetLichGap" asp-route-id="@item.Id" method="post">
+                                                    <input type="hidden" name="trangThai" value="Từ chối" />
+                                                    <button type="submit" class="btn btn-sm btn-danger" title="Từ chối" onclick="return confirm('Xác nhận từ chối cuộc hẹn này?');">
+                                                        <i class="fa-solid fa-xmark"></i> Từ chối
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

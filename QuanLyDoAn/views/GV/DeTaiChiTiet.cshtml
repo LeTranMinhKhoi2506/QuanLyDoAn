@@ -1,0 +1,164 @@
+@model QuanLyDoAn.Models.DeTai
+
+@{
+    ViewData["Title"] = "Chi tiết Đề Tài";
+    Layout = "~/views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="fa-solid fa-file-contract me-2 text-primary"></i> Chi tiết đề tài</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="/GV/DeTaiDangHuongDan" class="text-decoration-none">Đề tài đang hướng dẫn</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Chi tiết</li>
+                </ol>
+            </nav>
+        </div>
+        <a href="/GV/DeTaiDangHuongDan" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Thông tin đề tài -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow h-100 border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fa-solid fa-circle-info me-2"></i> Thông Tin Chung</h5>
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title text-primary fw-bold mb-3">@Model.TenDeTai</h3>
+                    <div class="mb-3">
+                        @if (Model.TrangThai == "Đang thực hiện" || Model.TrangThai == "Đã duyệt") {
+                            <span class="badge bg-primary fs-6">Đang thực hiện</span>
+                        } else if (Model.TrangThai == "Yêu cầu chỉnh sửa") {
+                            <span class="badge bg-warning text-dark fs-6">Yêu cầu chỉnh sửa</span>
+                        } else if (Model.TrangThai == "Đã nộp báo cáo") {
+                            <span class="badge bg-info text-dark fs-6">Đã nộp báo cáo</span>
+                        } else if(Model.TrangThai == "Hoàn thành") {
+                            <span class="badge bg-success fs-6">Hoàn thành</span>
+                        } else {
+                            <span class="badge bg-secondary fs-6">@Model.TrangThai</span>
+                        }
+                    </div>
+
+                    <h5 class="fw-bold mt-4 border-bottom pb-2">Mô tả đề tài</h5>
+                    <p class="text-justify lh-lg">@(string.IsNullOrEmpty(Model.MoTaDeTai) ? "Chưa có mô tả" : Model.MoTaDeTai)</p>
+
+                    <div class="row mt-4">
+                        <div class="col-sm-6 mb-3">
+                            <h6 class="text-muted fw-bold mb-1">Mã đề tài</h6>
+                            <p class="fs-5">@(string.IsNullOrEmpty(Model.MaDeTai) ? "---" : Model.MaDeTai)</p>
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <h6 class="text-muted fw-bold mb-1">Loại đề tài</h6>
+                            <p class="fs-5">@Model.LoaiDeTai</p>
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <h6 class="text-muted fw-bold mb-1">Công nghệ sử dụng</h6>
+                            <p class="fs-5">@(string.IsNullOrEmpty(Model.CongNgheSuDung) ? "Chưa xác định" : Model.CongNgheSuDung)</p>
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <h6 class="text-muted fw-bold mb-1">Đợt thực hiện</h6>
+                            <p class="fs-5">@(Model.DotDoAn?.TenDot ?? "Chưa phân đợt")</p>
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <h6 class="text-muted fw-bold mb-1">Ngày bắt đầu</h6>
+                            <p class="fs-5"><i class="fa-regular fa-calendar text-success me-2"></i> @Model.NgayBatDau.ToString("dd/MM/yyyy")</p>
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <h6 class="text-muted fw-bold mb-1">Hạn nộp dự kiến</h6>
+                            <p class="fs-5"><i class="fa-regular fa-calendar-xmark text-danger me-2"></i> @Model.NgayKetThuc.ToString("dd/MM/yyyy")</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thông tin sinh viên & Báo cáo -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow border-0 mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fa-solid fa-user-graduate me-2"></i> Sinh Viên Thực Hiện</h5>
+                </div>
+                <div class="card-body">
+                    @if(Model.SinhVien != null)
+                    {
+                        <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                            <div class="bg-light rounded-circle p-3 me-3 text-center" style="width: 60px; height: 60px;">
+                                <i class="fa-solid fa-user fs-4 text-secondary"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-1 fw-bold">@Model.SinhVien.HoTen</h5>
+                                <span class="badge bg-secondary">MSSV: @Model.SinhVien.MaSinhVien</span>
+                            </div>
+                        </div>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2"><i class="fa-solid fa-envelope text-muted me-2 w-20px"></i> @Model.SinhVien.Email</li>
+                            <li class="mb-2"><i class="fa-solid fa-phone text-muted me-2 w-20px"></i> @(string.IsNullOrEmpty(Model.SinhVien.SoDienThoai) ? "Chưa cập nhật" : Model.SinhVien.SoDienThoai)</li>
+                            <li class="mb-2"><i class="fa-solid fa-graduation-cap text-muted me-2 w-20px"></i> Lớp: @Model.SinhVien.Lop</li>
+                            <li><i class="fa-solid fa-calendar-days text-muted me-2 w-20px"></i> Khóa: @Model.SinhVien.KhoaHoc</li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center my-4 fst-italic">Không có thông tin sinh viên</p>
+                    }
+                </div>
+            </div>
+
+            <div class="card shadow border-0">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fa-solid fa-link me-2"></i> Tài liệu & Liên kết</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span><i class="fa-brands fa-github text-dark me-2"></i> GitHub Repository</span>
+                            @if (!string.IsNullOrEmpty(Model.LinkGitHub))
+                            {
+                                <a href="@Model.LinkGitHub" target="_blank" class="btn btn-sm btn-outline-dark">Truy cập</a>
+                            }
+                            else
+                            {
+                                <span class="text-muted small fst-italic">Chưa có</span>
+                            }
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span><i class="fa-solid fa-globe text-primary me-2"></i> Link Demo sản phẩm</span>
+                            @if (!string.IsNullOrEmpty(Model.LinkDemo))
+                            {
+                                <a href="@Model.LinkDemo" target="_blank" class="btn btn-sm btn-outline-primary">Mở Demo</a>
+                            }
+                            else
+                            {
+                                <span class="text-muted small fst-italic">Chưa có</span>
+                            }
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span><i class="fa-solid fa-file-pdf text-danger me-2"></i> File Báo Cáo</span>
+                            @if (!string.IsNullOrEmpty(Model.FileBaoCao))
+                            {
+                                <a href="@Model.FileBaoCao" target="_blank" class="btn btn-sm btn-danger"><i class="fa-solid fa-download"></i> Tải</a>
+                            }
+                            else
+                            {
+                                <span class="text-muted small fst-italic">Chưa nộp</span>
+                            }
+                        </li>
+                    </ul>
+
+                    @if(Model.DiemHuongDan.HasValue)
+                    {
+                        <div class="mt-4 p-3 bg-light rounded text-center border">
+                            <h6 class="text-muted text-uppercase mb-1">Điểm Hướng Dẫn</h6>
+                            <h2 class="text-success fw-bold mb-0">@Model.DiemHuongDan.Value / 10</h2>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

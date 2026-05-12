@@ -1,0 +1,80 @@
+@model QuanLyDoAn.Models.DeTai
+@{
+    ViewData["Title"] = "Đề tài của tôi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2><i class="fa-solid fa-folder-open me-2 text-primary"></i>Đề tài của tôi</h2>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-info mt-3">
+            @TempData["Message"]
+        </div>
+    }
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success mt-3">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (Model == null)
+    {
+        <div class="alert alert-warning mt-3">
+            Bạn chưa đăng ký đồ án nào. 
+            <a href="@Url.Action("DangKyDeXuat", "SV")" class="alert-link">Nhấn vào đây để đăng ký</a>.
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm mt-3 border-0">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                <h5 class="mb-0 fw-bold">Thông tin chi tiết</h5>
+                <span class="badge @(Model.TrangThai == "Chờ duyệt" ? "bg-warning text-dark" : Model.TrangThai == "Đã duyệt" ? "bg-success" : "bg-secondary") fs-6">
+                    @Model.TrangThai
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-3 fw-bold text-muted">Mã đề tài:</div>
+                    <div class="col-md-9">@Model.MaDeTai</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3 fw-bold text-muted">Tên đề tài:</div>
+                    <div class="col-md-9 fs-5 text-dark fw-semibold">@Model.TenDeTai</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3 fw-bold text-muted">Mô tả:</div>
+                    <div class="col-md-9">@(string.IsNullOrEmpty(Model.MoTaDeTai) ? "Không có mô tả" : Model.MoTaDeTai)</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3 fw-bold text-muted">Công nghệ sử dụng:</div>
+                    <div class="col-md-9">@(string.IsNullOrEmpty(Model.CongNgheSuDung) ? "Chưa xác định" : Model.CongNgheSuDung)</div>
+                </div>
+                <hr />
+                <div class="row mb-3">
+                    <div class="col-md-3 fw-bold text-muted">Giảng viên hướng dẫn:</div>
+                    <div class="col-md-9">
+                        @(Model.GiangVien != null ? Model.GiangVien.HoTen : "Chưa được phân công")
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3 fw-bold text-muted">Ngày bắt đầu dự kiến:</div>
+                    <div class="col-md-9">@(Model.NgayBatDau != default(DateTime) ? Model.NgayBatDau.ToString("dd/MM/yyyy") : "Chưa xác định")</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3 fw-bold text-muted">Ngày kết thúc dự kiến:</div>
+                    <div class="col-md-9">@(Model.NgayKetThuc != default(DateTime) ? Model.NgayKetThuc.ToString("dd/MM/yyyy") : "Chưa xác định")</div>
+                </div>
+            </div>
+            <div class="card-footer bg-light p-3">
+                <a href="@Url.Action("CapNhatTienDo", "SV")" class="btn btn-primary @(Model.TrangThai == "Chờ duyệt" ? "disabled" : "")">
+                    <i class="fa-solid fa-tasks me-1"></i> Quản lý tiến độ
+                </a>
+            </div>
+        </div>
+    }
+</div>
