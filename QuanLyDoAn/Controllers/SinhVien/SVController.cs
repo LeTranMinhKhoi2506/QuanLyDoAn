@@ -75,4 +75,114 @@ public class SVController : Controller
     {
         return View();
     }
+
+    // 1. Đăng ký / Đề xuất đề tài
+    [HttpGet]
+    public async Task<IActionResult> DangKyDeXuat()
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out int userId))
+        {
+             return RedirectToAction("Login", "Account");
+        }
+
+        var sinhVien = await _context.SinhViens.FirstOrDefaultAsync(s => s.UserId == userId);
+        if (sinhVien == null) return NotFound("Student profile not found.");
+
+        var currentDoAn = await _context.DeTais.FirstOrDefaultAsync(d => d.SinhVienId == sinhVien.Id);
+
+        // Nếu đã có đề tài, không cho đăng ký nữa
+        if (currentDoAn != null)
+        {
+            TempData["Message"] = "Bạn đã đăng ký đề tài rồi.";
+            return RedirectToAction(nameof(DeTaiCuaToi));
+        }
+
+        // Lấy danh sách giảng viên để chọn
+        ViewBag.GiangViens = await _context.GiangViens.ToListAsync();
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> DangKyDeXuat(DeTai model)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out int userId))
+        {
+             return RedirectToAction("Login", "Account");
+        }
+
+        var sinhVien = await _context.SinhViens.FirstOrDefaultAsync(s => s.UserId == userId);
+        if (sinhVien == null) return NotFound("Student profile not found.");
+
+        var currentDoAn = await _context.DeTais.FirstOrDefaultAsync(d => d.SinhVienId == sinhVien.Id);
+        if (currentDoAn != null)
+        {
+            TempData["Message"] = "Bạn đã đăng ký đề tài rồi.";
+            return RedirectToAction(nameof(DeTaiCuaToi));
+        }
+
+        if (ModelState.IsValid)
+        {
+            model.SinhVienId = sinhVien.Id;
+            model.TrangThai = "Chờ duyệt";
+            model.NgayTao = DateTime.Now;
+
+            // Generate a random MaDeTai or logic based
+            model.MaDeTai = "DT" + DateTime.Now.Ticks.ToString().Substring(10); 
+
+            _context.DeTais.Add(model);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Đăng ký đề tài thành công, chờ duyệt.";
+            return RedirectToAction(nameof(DeTaiCuaToi));
+        }
+
+        ViewBag.GiangViens = await _context.GiangViens.ToListAsync();
+        return View(model);
+    }
+
+    // 2. Đề tài của tôi
+    public async Task<IActionResult> DeTaiCuaToi()
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out int userId))
+        {
+             return RedirectToAction("Login", "Account");
+        }
+
+        var sinhVien = await _context.SinhViens.FirstOrDefaultAsync(s => s.UserId == userId);
+        if (sinhVien == null) return NotFound("Student profile not found.");
+
+        var deTai = await _context.DeTais
+            .Include(d => d.GiangVien)
+            .Include(d => d.TienDos)
+            .FirstOrDefaultAsync(d => d.SinhVienId == sinhVien.Id);
+
+        return View(deTai);
+    }
+
+    // 3. Cập nhật tiến độ
+    public IActionResult CapNhatTienDo()
+    {
+        return View();
+    }
+
+    // 4. Nộp báo cáo
+    public IActionResult NopBaoCao()
+    {
+        return View();
+    }
+
+    // 5. Nhận xét từ giảng viên
+    public IActionResult NhanXetTuGV()
+    {
+        return View();
+    }
+
+    // 6. Lịch gặp giảng viên
+    public IActionResult LichGapGiangVien()
+    {
+        return View();
+    }
 }

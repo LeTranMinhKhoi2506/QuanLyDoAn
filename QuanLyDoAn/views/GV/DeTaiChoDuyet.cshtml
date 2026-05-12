@@ -1,0 +1,106 @@
+@model IEnumerable<QuanLyDoAn.Models.DeTai>
+
+@{
+    ViewData["Title"] = "Đề tài chờ duyệt";
+    Layout = "~/views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fa-solid fa-list-check me-2"></i> Đề tài chờ duyệt</h2>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Tên Đề Tài</th>
+                            <th>Mô tả</th>
+                            <th>Loại</th>
+                            <th>Sinh Viên Đăng Ký</th>
+                            <th>Ngày Gửi</th>
+                            <th class="text-center">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center">Không có đề tài nào đang chờ duyệt</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td><strong>@item.TenDeTai</strong></td>
+                                    <td>@item.MoTaDeTai</td>
+                                    <td>@item.LoaiDeTai</td>
+                                    <td>
+                                        @if(item.SinhVien != null)
+                                        {
+                                            @item.SinhVien.HoTen <br />
+                                            <small class="text-muted">(@item.SinhVien.MaSinhVien)</small>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Không xác định</span>
+                                        }
+                                    </td>
+                                    <td>@item.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <form asp-action="DuyetDeTai" asp-route-id="@item.Id" method="post">
+                                                <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Bạn có chắc chắn muốn duyệt đề tài này?');">
+                                                    <i class="fa-solid fa-check"></i> Duyệt
+                                                </button>
+                                            </form>
+                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#tuChoiModal-@item.Id">
+                                                <i class="fa-solid fa-xmark"></i> Từ chối
+                                            </button>
+                                        </div>
+
+                                        <!-- Modal Từ chối -->
+                                        <div class="modal fade" id="tuChoiModal-@item.Id" tabindex="-1" aria-labelledby="tuChoiModalLabel-@item.Id" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content text-start">
+                                                    <form asp-action="TuChoiDeTai" asp-route-id="@item.Id" method="post">
+                                                        <div class="modal-header bg-danger text-white">
+                                                            <h5 class="modal-title" id="tuChoiModalLabel-@item.Id">Lý do từ chối - @item.TenDeTai</h5>
+                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div class="mb-3">
+                                                                <label for="lyDoTuChoi-@item.Id" class="form-label">Nhập lý do từ chối không duyệt đề tài thiết kế này:</label>
+                                                                <textarea class="form-control" name="lyDoTuChoi" id="lyDoTuChoi-@item.Id" rows="3" required></textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                                            <button type="submit" class="btn btn-danger">Xác nhận Từ chối</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
