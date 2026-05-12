@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QuanLyDoAn.Data;
 
@@ -10,9 +11,11 @@ using QuanLyDoAn.Data;
 namespace QuanLyDoAn.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260510122104_UpdateDeTaiModel")]
+    partial class UpdateDeTaiModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -118,51 +121,6 @@ namespace QuanLyDoAn.Migrations
                     b.HasIndex("SinhVienId");
 
                     b.ToTable("DeTais");
-                });
-
-            modelBuilder.Entity("QuanLyDoAn.Models.DiemHoiDong", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("DeTaiId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<double>("DiemBaoCao")
-                        .HasColumnType("REAL");
-
-                    b.Property<double>("DiemSanPham")
-                        .HasColumnType("REAL");
-
-                    b.Property<double>("DiemThuyetTrinh")
-                        .HasColumnType("REAL");
-
-                    b.Property<double>("DiemTraLoiCauHoi")
-                        .HasColumnType("REAL");
-
-                    b.Property<int>("GiangVienId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("HoiDongId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("NgayNhap")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("NhanXet")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DeTaiId");
-
-                    b.HasIndex("GiangVienId");
-
-                    b.HasIndex("HoiDongId");
-
-                    b.ToTable("DiemHoiDongs");
                 });
 
             modelBuilder.Entity("QuanLyDoAn.Models.DotDoAn", b =>
@@ -281,87 +239,35 @@ namespace QuanLyDoAn.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("DaKhoa")
+                    b.Property<int?>("ChuTichId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("DotDoAnId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("MoTa")
+                    b.Property<DateTime>("NgayBaoVe")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("NgayTao")
+                    b.Property<string>("PhongBaoVe")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("TenHoiDong")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("ThuKyId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("UyVienId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("DotDoAnId");
+                    b.HasIndex("ChuTichId");
+
+                    b.HasIndex("ThuKyId");
+
+                    b.HasIndex("UyVienId");
 
                     b.ToTable("HoiDongs");
-                });
-
-            modelBuilder.Entity("QuanLyDoAn.Models.HoiDongThanhVien", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("GiangVienId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("HoiDongId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("VaiTro")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GiangVienId");
-
-                    b.HasIndex("HoiDongId");
-
-                    b.ToTable("HoiDongThanhViens");
-                });
-
-            modelBuilder.Entity("QuanLyDoAn.Models.LichBaoVe", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("DeTaiId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("GhiChu")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("HoiDongId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("PhongBaoVe")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("ThoiGianBaoVe")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DeTaiId");
-
-                    b.HasIndex("HoiDongId");
-
-                    b.ToTable("LichBaoVes");
                 });
 
             modelBuilder.Entity("QuanLyDoAn.Models.LichGap", b =>
@@ -564,33 +470,6 @@ namespace QuanLyDoAn.Migrations
                     b.Navigation("SinhVien");
                 });
 
-            modelBuilder.Entity("QuanLyDoAn.Models.DiemHoiDong", b =>
-                {
-                    b.HasOne("QuanLyDoAn.Models.DeTai", "DeTai")
-                        .WithMany()
-                        .HasForeignKey("DeTaiId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("QuanLyDoAn.Models.GiangVien", "GiangVien")
-                        .WithMany()
-                        .HasForeignKey("GiangVienId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("QuanLyDoAn.Models.HoiDong", "HoiDong")
-                        .WithMany()
-                        .HasForeignKey("HoiDongId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DeTai");
-
-                    b.Navigation("GiangVien");
-
-                    b.Navigation("HoiDong");
-                });
-
             modelBuilder.Entity("QuanLyDoAn.Models.GiangVien", b =>
                 {
                     b.HasOne("QuanLyDoAn.Models.User", "User")
@@ -604,49 +483,23 @@ namespace QuanLyDoAn.Migrations
 
             modelBuilder.Entity("QuanLyDoAn.Models.HoiDong", b =>
                 {
-                    b.HasOne("QuanLyDoAn.Models.DotDoAn", "DotDoAn")
+                    b.HasOne("QuanLyDoAn.Models.GiangVien", "ChuTich")
                         .WithMany()
-                        .HasForeignKey("DotDoAnId");
+                        .HasForeignKey("ChuTichId");
 
-                    b.Navigation("DotDoAn");
-                });
-
-            modelBuilder.Entity("QuanLyDoAn.Models.HoiDongThanhVien", b =>
-                {
-                    b.HasOne("QuanLyDoAn.Models.GiangVien", "GiangVien")
+                    b.HasOne("QuanLyDoAn.Models.GiangVien", "ThuKy")
                         .WithMany()
-                        .HasForeignKey("GiangVienId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ThuKyId");
 
-                    b.HasOne("QuanLyDoAn.Models.HoiDong", "HoiDong")
-                        .WithMany("ThanhViens")
-                        .HasForeignKey("HoiDongId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("GiangVien");
-
-                    b.Navigation("HoiDong");
-                });
-
-            modelBuilder.Entity("QuanLyDoAn.Models.LichBaoVe", b =>
-                {
-                    b.HasOne("QuanLyDoAn.Models.DeTai", "DeTai")
+                    b.HasOne("QuanLyDoAn.Models.GiangVien", "UyVien")
                         .WithMany()
-                        .HasForeignKey("DeTaiId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UyVienId");
 
-                    b.HasOne("QuanLyDoAn.Models.HoiDong", "HoiDong")
-                        .WithMany("LichBaoVes")
-                        .HasForeignKey("HoiDongId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("ChuTich");
 
-                    b.Navigation("DeTai");
+                    b.Navigation("ThuKy");
 
-                    b.Navigation("HoiDong");
+                    b.Navigation("UyVien");
                 });
 
             modelBuilder.Entity("QuanLyDoAn.Models.LichGap", b =>
@@ -719,10 +572,6 @@ namespace QuanLyDoAn.Migrations
             modelBuilder.Entity("QuanLyDoAn.Models.HoiDong", b =>
                 {
                     b.Navigation("DeTaisDuocCham");
-
-                    b.Navigation("LichBaoVes");
-
-                    b.Navigation("ThanhViens");
                 });
 
             modelBuilder.Entity("QuanLyDoAn.Models.SinhVien", b =>

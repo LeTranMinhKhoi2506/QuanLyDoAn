@@ -1,0 +1,120 @@
+@model IEnumerable<QuanLyDoAn.Models.TienDo>
+
+@{
+    ViewData["Title"] = "Tiến độ & Nhận xét";
+    Layout = "~/views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fa-solid fa-tasks me-2"></i> Tiến độ dự án & Ghi chú nhận xét</h2>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Sinh Viên</th>
+                            <th>Đề Tài</th>
+                            <th>Tên Công Việc</th>
+                            <th>Cập Nhật Lúc</th>
+                            <th>Tiến Độ (%)</th>
+                            <th>Trạng Thái Nhận Xét</th>
+                            <th class="text-center">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center">Chưa có tiến độ nào được báo cáo</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@item.DeTai?.SinhVien?.HoTen</strong>
+                                        <br /><small class="text-muted">(@item.DeTai?.SinhVien?.MaSinhVien)</small>
+                                    </td>
+                                    <td>@item.DeTai?.TenDeTai</td>
+                                    <td>
+                                        <strong>@item.TenCongViec</strong>
+                                        <br />
+                                        <small>@item.NoiDungDaLam</small>
+                                        @if(!string.IsNullOrEmpty(item.FileMinhChung)) {
+                                            <div class="mt-1">
+                                                <a href="@item.FileMinhChung" class="badge bg-secondary text-decoration-none" target="_blank"><i class="fa-solid fa-paperclip"></i> Đính kèm</a>
+                                            </div>
+                                        }
+                                    </td>
+                                    <td>@item.NgayCapNhat.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar @(item.PhanTramHoanThanh == 100 ? "bg-success" : "bg-primary")" role="progressbar" style="width: @item.PhanTramHoanThanh%;" aria-valuenow="@item.PhanTramHoanThanh" aria-valuemin="0" aria-valuemax="100">@item.PhanTramHoanThanh%</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if(string.IsNullOrEmpty(item.NhanXetCuaGiangVien))
+                                        {
+                                            <span class="badge bg-warning text-dark"><i class="fa-solid fa-triangle-exclamation"></i> Chờ nhận xét</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success"><i class="fa-solid fa-check"></i> Đã có nhận xét</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#nhanXetModal-@item.Id">
+                                            <i class="fa-solid fa-pen-to-square"></i> Nhận xét
+                                        </button>
+
+                                        <!-- Modal Nhận Xét -->
+                                        <div class="modal fade" id="nhanXetModal-@item.Id" tabindex="-1" aria-labelledby="nhanXetModalLabel-@item.Id" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg">
+                                                <div class="modal-content text-start">
+                                                    <form asp-action="CapNhatNhanXet" asp-route-id="@item.Id" method="post">
+                                                        <div class="modal-header bg-primary text-white">
+                                                            <h5 class="modal-title" id="nhanXetModalLabel-@item.Id">Nhận xét tiến độ của @item.DeTai?.SinhVien?.HoTen</h5>
+                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div class="mb-3">
+                                                                <label class="fw-bold">Nội dung sinh viên đã làm:</label>
+                                                                <div class="p-2 bg-light border rounded">@item.NoiDungDaLam</div>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label for="nhanXetCuaGiangVien-@item.Id" class="form-label fw-bold">Nhận xét của Giảng viên:</label>
+                                                                <textarea class="form-control" name="nhanXetCuaGiangVien" id="nhanXetCuaGiangVien-@item.Id" rows="5">@item.NhanXetCuaGiangVien</textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Lưu Nhận Xét</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

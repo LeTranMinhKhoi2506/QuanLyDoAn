@@ -1,0 +1,97 @@
+@model QuanLyDoAn.Models.DeTai
+@{
+    ViewData["Title"] = "Sửa Đề Tài";
+    var danhSachTrangThai = ViewBag.DanhSachTrangThai as string[] ?? Array.Empty<string>();
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0"><i class="fas fa-edit me-2"></i>Sửa Đề Tài</h1>
+    <a asp-controller="AdminDeTai" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary btn-sm">
+        <i class="fas fa-arrow-left me-1"></i>Quay lại
+    </a>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <form asp-controller="AdminDeTai" asp-action="Edit" asp-route-id="@Model.Id" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="All" class="alert alert-danger py-2 small" style="display:@(ViewData.ModelState.IsValid ? "none" : "block")"></div>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Mã đề tài</label>
+                    <input asp-for="MaDeTai" class="form-control @(!ViewData.ModelState["MaDeTai"]?.Errors.Any() == false ? "is-invalid" : "")" />
+                    <span asp-validation-for="MaDeTai" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-md-8">
+                    <label class="form-label fw-bold">Tên đề tài <span class="text-danger">*</span></label>
+                    <input asp-for="TenDeTai" class="form-control @(!ViewData.ModelState["TenDeTai"]?.Errors.Any() == false ? "is-invalid" : "")" />
+                    <span asp-validation-for="TenDeTai" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Loại đề tài <span class="text-danger">*</span></label>
+                    <select asp-for="LoaiDeTai" class="form-select @(!ViewData.ModelState["LoaiDeTai"]?.Errors.Any() == false ? "is-invalid" : "")">
+                        <option value="">-- Chọn loại --</option>
+                        <option value="Đồ án">Đồ án</option>
+                        <option value="Luận văn">Luận văn</option>
+                    </select>
+                    <span asp-validation-for="LoaiDeTai" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Đợt đồ án</label>
+                    <select asp-for="DotDoAnId" class="form-select @(!ViewData.ModelState["DotDoAnId"]?.Errors.Any() == false ? "is-invalid" : "")" asp-items="ViewBag.DotDoAnList">
+                        <option value="">-- Chọn đợt --</option>
+                    </select>
+                    <span asp-validation-for="DotDoAnId" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label fw-bold">Mô tả đề tài</label>
+                    <textarea asp-for="MoTaDeTai" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label fw-bold">Công nghệ sử dụng</label>
+                    <input asp-for="CongNgheSuDung" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Ngày bắt đầu <span class="text-danger">*</span></label>
+                    <input asp-for="NgayBatDau" type="date" class="form-control @(!ViewData.ModelState["NgayBatDau"]?.Errors.Any() == false ? "is-invalid" : "")" />
+                    <span asp-validation-for="NgayBatDau" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Ngày kết thúc <span class="text-danger">*</span></label>
+                    <input asp-for="NgayKetThuc" type="date" class="form-control @(!ViewData.ModelState["NgayKetThuc"]?.Errors.Any() == false ? "is-invalid" : "")" />
+                    <span asp-validation-for="NgayKetThuc" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Sinh viên</label>
+                    <select asp-for="SinhVienId" class="form-select @(!ViewData.ModelState["SinhVienId"]?.Errors.Any() == false ? "is-invalid" : "")" asp-items="ViewBag.SinhVienList">
+                        <option value="">-- Chọn sinh viên --</option>
+                    </select>
+                    <span asp-validation-for="SinhVienId" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Giảng viên hướng dẫn</label>
+                    <select asp-for="GiangVienId" class="form-select @(!ViewData.ModelState["GiangVienId"]?.Errors.Any() == false ? "is-invalid" : "")" asp-items="ViewBag.GiangVienList">
+                        <option value="">-- Chọn giảng viên --</option>
+                    </select>
+                    <span asp-validation-for="GiangVienId" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-12 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Lưu</button>
+                    <a asp-controller="AdminDeTai" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">Hủy</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

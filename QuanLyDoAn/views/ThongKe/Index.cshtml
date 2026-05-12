@@ -1,0 +1,291 @@
+@{
+    ViewData["Title"] = "Thống Kê";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="h3 mb-0 text-gray-800">Thống Kê Đề Tài</h2>
+    <div>
+        <button class="btn btn-success btn-sm" onclick="exportExcel()">
+            <i class="fa-solid fa-file-excel me-1"></i> Xuất Excel
+        </button>
+        <button class="btn btn-danger btn-sm ms-2" onclick="exportPDF()">
+            <i class="fa-solid fa-file-pdf me-1"></i> Xuất PDF
+        </button>
+    </div>
+</div>
+
+<!-- Tổng quan -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-3">
+        <div class="card border-start border-primary border-4 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <i class="fa-solid fa-book fa-2x text-primary"></i>
+                <div>
+                    <div class="text-muted small">Tổng Đề Tài</div>
+                    <div class="h4 mb-0 fw-bold" id="tong-de-tai">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-3">
+        <div class="card border-start border-success border-4 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <i class="fa-solid fa-chalkboard-teacher fa-2x text-success"></i>
+                <div>
+                    <div class="text-muted small">Giảng Viên</div>
+                    <div class="h4 mb-0 fw-bold" id="tong-gv">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-3">
+        <div class="card border-start border-info border-4 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <i class="fa-solid fa-users fa-2x text-info"></i>
+                <div>
+                    <div class="text-muted small">Sinh Viên</div>
+                    <div class="h4 mb-0 fw-bold" id="tong-sv">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-3">
+        <div class="card border-start border-warning border-4 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <i class="fa-solid fa-calendar-days fa-2x text-warning"></i>
+                <div>
+                    <div class="text-muted small">Đợt Đồ Án</div>
+                    <div class="h4 mb-0 fw-bold" id="tong-dot">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Biểu đồ hàng 1 -->
+<div class="row mb-4">
+    <div class="col-lg-5 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header fw-semibold bg-white">
+                <i class="fa-solid fa-chart-pie me-2 text-primary"></i>Đề Tài Theo Trạng Thái
+            </div>
+            <div class="card-body d-flex justify-content-center align-items-center">
+                <canvas id="chartTrangThai" style="max-height:280px;"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-7 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header fw-semibold bg-white">
+                <i class="fa-solid fa-chart-bar me-2 text-success"></i>Đề Tài Theo Đợt Đồ Án
+            </div>
+            <div class="card-body">
+                <canvas id="chartTheoDot" style="max-height:280px;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Biểu đồ hàng 2 -->
+<div class="row mb-4">
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header fw-semibold bg-white">
+                <i class="fa-solid fa-chart-bar me-2 text-info"></i>Top 10 Giảng Viên Hướng Dẫn
+            </div>
+            <div class="card-body">
+                <canvas id="chartGiangVien" style="max-height:280px;"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header fw-semibold bg-white">
+                <i class="fa-solid fa-chart-pie me-2 text-warning"></i>Đề Tài Theo Bộ Môn
+            </div>
+            <div class="card-body d-flex justify-content-center align-items-center">
+                <canvas id="chartBoMon" style="max-height:280px;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tiến độ -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header fw-semibold bg-white">
+        <i class="fa-solid fa-list-check me-2 text-secondary"></i>Tiến Độ Đề Tài Đang Thực Hiện
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã Đề Tài</th>
+                        <th>Tên Đề Tài</th>
+                        <th style="width:40%">Tiến Độ</th>
+                        <th class="text-end">%</th>
+                    </tr>
+                </thead>
+                <tbody id="tien-do-body">
+                    <tr><td colspan="4" class="text-center text-muted py-3">Đang tải...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+const COLORS = ['#0d6efd','#198754','#ffc107','#dc3545','#0dcaf0','#6f42c1','#fd7e14','#20c997','#6c757d','#d63384'];
+let chartTrangThai, chartTheoDot, chartGiangVien, chartBoMon;
+let cachedData = {};
+
+async function fetchAll() {
+    const [tq, tt, dot, gv, bm, td] = await Promise.all([
+        fetch('/ThongKe/ThongKeTongQuan').then(r => r.json()),
+        fetch('/ThongKe/ThongKeTrangThai').then(r => r.json()),
+        fetch('/ThongKe/ThongKeTheoDot').then(r => r.json()),
+        fetch('/ThongKe/ThongKeTheoGiangVien').then(r => r.json()),
+        fetch('/ThongKe/ThongKeoBoMon').then(r => r.json()),
+        fetch('/ThongKe/ThongKeTienDo').then(r => r.json()),
+    ]);
+    cachedData = { tq, tt, dot, gv, bm, td };
+
+    document.getElementById('tong-de-tai').textContent = tq.tongDeTai;
+    document.getElementById('tong-gv').textContent = tq.tongGiangVien;
+    document.getElementById('tong-sv').textContent = tq.tongSinhVien;
+    document.getElementById('tong-dot').textContent = tq.tongDot;
+
+    if (chartTrangThai) chartTrangThai.destroy();
+    chartTrangThai = new Chart(document.getElementById('chartTrangThai'), {
+        type: 'doughnut',
+        data: { labels: tt.map(x => x.trangThai), datasets: [{ data: tt.map(x => x.soLuong), backgroundColor: COLORS }] },
+        options: { plugins: { legend: { position: 'bottom' } } }
+    });
+
+    if (chartTheoDot) chartTheoDot.destroy();
+    chartTheoDot = new Chart(document.getElementById('chartTheoDot'), {
+        type: 'bar',
+        data: { labels: dot.map(x => x.tenDot), datasets: [{ label: 'Số đề tài', data: dot.map(x => x.soLuong), backgroundColor: '#0d6efd' }] },
+        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+
+    if (chartGiangVien) chartGiangVien.destroy();
+    chartGiangVien = new Chart(document.getElementById('chartGiangVien'), {
+        type: 'bar',
+        data: { labels: gv.map(x => x.giangVien), datasets: [{ label: 'Số đề tài', data: gv.map(x => x.soLuong), backgroundColor: '#0dcaf0' }] },
+        options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+
+    if (chartBoMon) chartBoMon.destroy();
+    chartBoMon = new Chart(document.getElementById('chartBoMon'), {
+        type: 'pie',
+        data: { labels: bm.map(x => x.boMon), datasets: [{ data: bm.map(x => x.soLuong), backgroundColor: COLORS }] },
+        options: { plugins: { legend: { position: 'bottom' } } }
+    });
+
+    const tbody = document.getElementById('tien-do-body');
+    if (!td.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">Không có đề tài đang thực hiện</td></tr>';
+        return;
+    }
+    tbody.innerHTML = td.map(x => {
+        const pct = Math.round(x.tienDo);
+        const color = pct >= 80 ? 'success' : pct >= 50 ? 'info' : pct >= 30 ? 'warning' : 'danger';
+        return `<tr>
+            <td><code>${x.maDeTai}</code></td>
+            <td>${x.tenDeTai}</td>
+            <td><div class="progress" style="height:18px;">
+                <div class="progress-bar bg-${color}" style="width:${pct}%">${pct}%</div>
+            </div></td>
+            <td class="text-end fw-semibold">${pct}%</td>
+        </tr>`;
+    }).join('');
+}
+
+function exportExcel() {
+    const { tt, dot, gv, bm } = cachedData;
+    const wb = XLSX.utils.book_new();
+    const addSheet = (name, headers, rows) =>
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers, ...rows]), name);
+    addSheet('Trang Thai', ['Trang Thai', 'So Luong'], tt.map(x => [x.trangThai, x.soLuong]));
+    addSheet('Theo Dot', ['Dot Do An', 'So Luong'], dot.map(x => [x.tenDot, x.soLuong]));
+    addSheet('Giang Vien', ['Giang Vien', 'So Luong'], gv.map(x => [x.giangVien, x.soLuong]));
+    addSheet('Bo Mon', ['Bo Mon', 'So Luong'], bm.map(x => [x.boMon, x.soLuong]));
+    XLSX.writeFile(wb, 'ThongKeDeTai.xlsx');
+}
+
+async function exportPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const pageW = doc.internal.pageSize.getWidth();
+    let y = 10;
+
+    const addTableImage = async (elementId) => {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+        const canvas = await html2canvas(el, { scale: 2, useCORS: true });
+        const imgData = canvas.toDataURL('image/png');
+        const imgW = pageW - 20;
+        const imgH = (canvas.height * imgW) / canvas.width;
+        if (y + imgH > 285) { doc.addPage(); y = 10; }
+        doc.addImage(imgData, 'PNG', 10, y, imgW, imgH);
+        y += imgH + 6;
+    };
+
+    // Tạo bảng tạm để render
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'position:fixed;left:-9999px;top:0;background:#fff;padding:10px;font-family:Arial,sans-serif;font-size:13px;';
+
+    const sections = [
+        { title: 'Thống Kê Theo Trạng Thái', headers: ['Trạng Thái', 'Số Lượng'], rows: cachedData.tt.map(x => [x.trangThai, x.soLuong]) },
+        { title: 'Thống Kê Theo Đợt Đồ Án', headers: ['Đợt Đồ Án', 'Số Lượng'], rows: cachedData.dot.map(x => [x.tenDot, x.soLuong]) },
+        { title: 'Top 10 Giảng Viên', headers: ['Giảng Viên', 'Số Lượng'], rows: cachedData.gv.map(x => [x.giangVien, x.soLuong]) },
+        { title: 'Thống Kê Theo Bộ Môn', headers: ['Bộ Môn', 'Số Lượng'], rows: cachedData.bm.map(x => [x.boMon, x.soLuong]) },
+    ];
+
+    sections.forEach(s => {
+        const h3 = document.createElement('h3');
+        h3.textContent = s.title;
+        h3.style.cssText = 'font-size:14px;margin:10px 0 4px;';
+        wrapper.appendChild(h3);
+        const tbl = document.createElement('table');
+        tbl.style.cssText = 'border-collapse:collapse;width:500px;';
+        const thead = `<thead><tr>${s.headers.map(h => `<th style="border:1px solid #ccc;padding:6px 10px;background:#0d6efd;color:#fff;">${h}</th>`).join('')}</tr></thead>`;
+        const tbody = `<tbody>${s.rows.map((r, i) => `<tr style="background:${i%2?'#f8f9fa':'#fff'}">${r.map(c => `<td style="border:1px solid #ccc;padding:5px 10px;">${c}</td>`).join('')}</tr>`).join('')}</tbody>`;
+        tbl.innerHTML = thead + tbody;
+        wrapper.appendChild(tbl);
+    });
+
+    document.body.appendChild(wrapper);
+    const canvas = await html2canvas(wrapper, { scale: 2, useCORS: true });
+    document.body.removeChild(wrapper);
+
+    const imgData = canvas.toDataURL('image/png');
+    const imgW = pageW - 20;
+    const imgH = (canvas.height * imgW) / canvas.width;
+    const pageH = doc.internal.pageSize.getHeight();
+    let srcY = 0;
+    while (srcY < canvas.height) {
+        const sliceH = Math.min((pageH - 20) * canvas.width / imgW, canvas.height - srcY);
+        const sliceCanvas = document.createElement('canvas');
+        sliceCanvas.width = canvas.width;
+        sliceCanvas.height = sliceH;
+        sliceCanvas.getContext('2d').drawImage(canvas, 0, srcY, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
+        const sliceImg = sliceCanvas.toDataURL('image/png');
+        const sliceImgH = sliceH * imgW / canvas.width;
+        if (srcY > 0) doc.addPage();
+        doc.addImage(sliceImg, 'PNG', 10, 10, imgW, sliceImgH);
+        srcY += sliceH;
+    }
+
+    doc.save('ThongKeDeTai.pdf');
+}
+
+fetchAll();
+</script>
+}

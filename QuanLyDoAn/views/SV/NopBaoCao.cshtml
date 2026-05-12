@@ -1,0 +1,159 @@
+@model QuanLyDoAn.Models.DeTai
+@{
+    ViewData["Title"] = "Nộp báo cáo cuối kỳ";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2><i class="fa-solid fa-cloud-arrow-up me-2 text-primary"></i>Nộp báo cáo đồ án</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success mt-3 shadow-sm">
+            <i class="fa-solid fa-check-circle me-1"></i> @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="row mt-4">
+        <div class="col-lg-5">
+            <!-- Xem thông tin các tệp đã nộp -->
+            <div class="card shadow-sm border-0 mb-4 h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0">Tài liệu đã nộp</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-4">Các tài liệu, link bạn đã tải lên hệ thống sẽ hiển thị ở đây.</p>
+
+                    <ul class="list-group list-group-flush">
+                        <!-- File báo cáo -->
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <div>
+                                <i class="fa-solid fa-file-pdf fs-4 me-2 text-danger"></i> 
+                                <span class="fw-bold">File báo cáo (Word/PDF)</span>
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.FileBaoCao))
+                            {
+                                <a href="@Url.Content(Model.FileBaoCao)" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">Tải xem</a>
+                            }
+                            else
+                            {
+                                <span class="text-muted fst-italic small">Chưa nộp</span>
+                            }
+                        </li>
+
+                        <!-- File Slide -->
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 mt-2">
+                            <div>
+                                <i class="fa-solid fa-file-powerpoint fs-4 me-2 text-warning"></i> 
+                                <span class="fw-bold">File Slide PPT</span>
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.FileSlide))
+                            {
+                                <a href="@Url.Content(Model.FileSlide)" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">Tải xem</a>
+                            }
+                            else
+                            {
+                                <span class="text-muted fst-italic small">Chưa nộp</span>
+                            }
+                        </li>
+
+                        <!-- Source Code -->
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 mt-2">
+                            <div>
+                                <i class="fa-solid fa-file-zipper fs-4 me-2 text-secondary"></i> 
+                                <span class="fw-bold">Mã nguồn (Zip/Rar)</span>
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.FileSourceCode))
+                            {
+                                <a href="@Url.Content(Model.FileSourceCode)" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">Tải xem</a>
+                            }
+                            else
+                            {
+                                <span class="text-muted fst-italic small">Chưa nộp</span>
+                            }
+                        </li>
+
+                        <!-- Link Github -->
+                        <li class="list-group-item px-0 mt-2">
+                            <div class="fw-bold mb-1"><i class="fa-brands fa-github fs-4 me-2 text-dark"></i> Link Github repos:</div>
+                            @if (!string.IsNullOrEmpty(Model.LinkGitHub))
+                            {
+                                <a href="@Model.LinkGitHub" target="_blank" class="text-decoration-none ms-4">@Model.LinkGitHub</a>
+                            }
+                            else
+                            {
+                                <div class="ms-4 text-muted fst-italic small">Chưa cập nhật</div>
+                            }
+                        </li>
+
+                        <!-- Link Demo -->
+                        <li class="list-group-item px-0 mt-2 border-bottom-0">
+                            <div class="fw-bold mb-1"><i class="fa-solid fa-globe fs-4 me-2 text-info"></i> Link Website Demo:</div>
+                            @if (!string.IsNullOrEmpty(Model.LinkDemo))
+                            {
+                                <a href="@Model.LinkDemo" target="_blank" class="text-decoration-none ms-4">@Model.LinkDemo</a>
+                            }
+                            else
+                            {
+                                <div class="ms-4 text-muted fst-italic small">Chưa cập nhật</div>
+                            }
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <!-- Form nộp -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0">Biểu mẫu tải lên</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info py-2 small mb-4">
+                        <i class="fa-solid fa-circle-info me-1"></i> Tải lại các file MỚI sẽ đè / thay thế trực tiếp các file CŨ.
+                    </div>
+
+                    <form asp-action="NopBaoCao" method="post" enctype="multipart/form-data">
+                        <!-- Tải file Upload -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">1. File Báo Cáo (Word/PDF)</label>
+                            <input class="form-control" type="file" name="FileBaoCao" accept=".doc,.docx,.pdf">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">2. File Slide Thuyết Trình (PPT/PPTX)</label>
+                            <input class="form-control" type="file" name="FileSlide" accept=".ppt,.pptx,.pdf">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">3. Mã nguồn SourceCode (ZIP/RAR)</label>
+                            <input class="form-control" type="file" name="FileSourceCode" accept=".zip,.rar,.7z">
+                        </div>
+
+                        <hr class="mt-4 mb-4" />
+
+                        <!-- Điền liên kết -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">4. Đường dẫn Github (Repositories)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-brands fa-github"></i></span>
+                                <input type="url" class="form-control" name="LinkGitHub" placeholder="https://github.com/..." value="@Model.LinkGitHub" />
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">5. Đường dẫn Demo thực tế (Nếu có)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-link"></i></span>
+                                <input type="url" class="form-control" name="LinkDemo" placeholder="https://..." value="@Model.LinkDemo" />
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg"><i class="fa-solid fa-cloud-arrow-up me-2"></i> LƯU NỘP BÁO CÁO</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

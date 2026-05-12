@@ -31,8 +31,45 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarMain">
                     <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#"><i class="fa-solid fa-bell"></i> Thông báo</a>
+                        <!-- Notification Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fa-solid fa-bell"></i> Thông báo
+                                <span id="notification-badge" class="badge bg-danger rounded-pill" style="display: none;">0</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end dropdown-notification" style="width: 350px; max-height: 500px; overflow-y: auto;">
+                                <div class="p-2 border-bottom">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0"><i class="fa-solid fa-bell me-2"></i>Thông báo mới</h6>
+                                        <button id="mark-all-read-btn" class="btn btn-sm btn-link p-0 text-decoration-none" style="display: none;">
+                                            Đánh dấu tất cả đã đọc
+                                        </button>
+                                    </div>
+                                </div>
+                                <li id="notification-list">
+                                    <!-- Notifications will be loaded here -->
+                                </li>
+                                <div id="notification-empty" class="dropdown-item text-center text-muted" style="display: none;">
+                                    <i class="fa-regular fa-bell-slash fa-2x mb-2"></i>
+                                    <p class="mb-0">Không có thông báo mới</p>
+                                </div>
+                                <div class="border-top">
+                                    @if (User.IsInRole("Giảng viên"))
+                                    {
+                                        <a class="dropdown-item text-center text-primary fw-bold" href="/GV/ThongBao">
+                                            Xem tất cả thông báo
+                                            <i class="fa-solid fa-arrow-right ms-1"></i>
+                                        </a>
+                                    }
+                                    else if (User.IsInRole("Sinh viên"))
+                                    {
+                                        <a class="dropdown-item text-center text-primary fw-bold" href="/SV/ThongBao">
+                                            Xem tất cả thông báo
+                                            <i class="fa-solid fa-arrow-right ms-1"></i>
+                                        </a>
+                                    }
+                                </div>
+                            </ul>
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
@@ -71,13 +108,13 @@
                     <a href="/AdminDotDoAn/Manage" class="list-group-item list-group-item-action bg-transparent text-light border-0">
                         <i class="fa-solid fa-calendar-alt me-2"></i> Quản lý đợt đồ án
                     </a>
-                    <a href="/DeTai/Manage" class="list-group-item list-group-item-action bg-transparent text-light border-0">
+                    <a href="/AdminDeTai/Manage" class="list-group-item list-group-item-action bg-transparent text-light border-0">
                         <i class="fa-solid fa-list-check me-2"></i> Quản lý đề tài
                     </a>
-                    <a href="/DeTai/PhanCong" class="list-group-item list-group-item-action bg-transparent text-light border-0">
+                    <a href="/AdminDeTai/PhanCong" class="list-group-item list-group-item-action bg-transparent text-light border-0">
                         <i class="fa-solid fa-user-plus me-2"></i> Phân công giảng viên
                     </a>
-                    <a href="/HoiDong/Manage" class="list-group-item list-group-item-action bg-transparent text-light border-0">
+                    <a href="/AdminHoiDong/Manage" class="list-group-item list-group-item-action bg-transparent text-light border-0">
                         <i class="fa-solid fa-users-viewfinder me-2"></i> Quản lý hội đồng
                     </a>
                     <a href="/ThongKe" class="list-group-item list-group-item-action bg-transparent text-light border-0">
@@ -110,35 +147,29 @@
                         <a href="/GV/ChamDiem" class="list-group-item list-group-item-action bg-transparent text-light border-0">
                             <i class="fa-solid fa-marker me-2"></i> Chấm điểm
                         </a>
-                        <a href="/GV/ThongBao" class="list-group-item list-group-item-action bg-transparent text-light border-0">
-                            <i class="fa-solid fa-bell me-2"></i> Thông báo
-                        </a>
                     }
 
                     @if (User.IsInRole("Sinh viên"))
                     {
                         <!-- Student Menu -->
                         <div class="px-3 py-2 text-white-50 small fw-bold text-uppercase mt-2">Sinh viên</div>
-                        <a href="/SV/DangKy" class="list-group-item list-group-item-action bg-transparent text-light border-0">
+                        <a href="@Url.Action("DangKyDeXuat", "SV")" class="list-group-item list-group-item-action bg-transparent text-light border-0">
                             <i class="fa-solid fa-pen-to-square me-2"></i> Đăng ký/Đề xuất
                         </a>
-                        <a href="/SV/DeTaiCuaToi" class="list-group-item list-group-item-action bg-transparent text-light border-0">
+                        <a href="@Url.Action("DeTaiCuaToi", "SV")" class="list-group-item list-group-item-action bg-transparent text-light border-0">
                             <i class="fa-solid fa-folder-open me-2"></i> Đề tài của tôi
                         </a>
                         <a href="/SV/CapNhatTienDo" class="list-group-item list-group-item-action bg-transparent text-light border-0">
                             <i class="fa-solid fa-tasks me-2"></i> Cập nhật tiến độ
                         </a>
-                        <a href="/SV/NopBaoCao" class="list-group-item list-group-item-action bg-transparent text-light border-0">
+                        <a href="@Url.Action("NopBaoCao", "SV")" class="list-group-item list-group-item-action bg-transparent text-light border-0">
                             <i class="fa-solid fa-cloud-arrow-up me-2"></i> Nộp báo cáo
                         </a>
-                        <a href="/SV/NhanXet" class="list-group-item list-group-item-action bg-transparent text-light border-0">
+                        <a href="@Url.Action("NhanXetTuGV", "SV")" class="list-group-item list-group-item-action bg-transparent text-light border-0">
                             <i class="fa-solid fa-comments me-2"></i> Nhận xét từ GV
                         </a>
-                        <a href="/SV/LichGap" class="list-group-item list-group-item-action bg-transparent text-light border-0">
+                        <a href="@Url.Action("LichGapGiangVien", "SV")" class="list-group-item list-group-item-action bg-transparent text-light border-0">
                             <i class="fa-solid fa-calendar-plus me-2"></i> Lịch gặp giảng viên
-                        </a>
-                        <a href="/SV/ThongBao" class="list-group-item list-group-item-action bg-transparent text-light border-0">
-                            <i class="fa-solid fa-bell me-2"></i> Thông báo
                         </a>
                     }
                 </div>
@@ -158,8 +189,139 @@
             $("#menu-toggle").click(function (e) {
                 e.preventDefault();
                 $("#sidebar-wrapper").toggleClass("toggled");
-            });
         });
+    });
+
+    // Notification Dropdown functionality
+    let notificationConnection = null;
+    let unreadNotificationCount = 0;
+
+    function loadLatestNotifications() {
+        $.getJSON('/api/ThongBao/latest?count=5', function(data) {
+            const list = $('#notification-list');
+            list.empty();
+
+            if (data.length === 0) {
+                $('#notification-empty').show();
+            } else {
+                $('#notification-empty').hide();
+                $.each(data, function(i, tb) {
+                    const date = new Date(tb.ngayTao);
+                    const formattedDate = date.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+                    const readClass = tb.daDoc ? '' : 'bg-light';
+                    const dotClass = tb.daDoc ? 'text-secondary' : 'text-danger';
+                    
+                    const item = `
+                        <li class="dropdown-item border-0 border-bottom ${readClass}" data-id="${tb.id}">
+                            <div class="d-flex w-100 justify-content-between">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-primary p-1 me-2" style="font-size: 0.6rem;">
+                                            <i class="fa-solid fa-circle" style="font-size: 0.5rem;"></i>
+                                        </span>
+                                        <span class="fw-medium small">${tb.noiDung}</span>
+                                    </div>
+                                    <small class="text-muted ms-4">${formattedDate}</small>
+                                </div>
+                            </div>
+                        </li>
+                    `;
+                    list.append(item);
+                });
+                updateNotificationBadge();
+            }
+        }).fail(function() {
+            list.empty();
+        });
+    }
+
+    function updateNotificationBadge() {
+        // Count unread from dropdown items
+        unreadNotificationCount = $('#notification-list .bg-light').length;
+        const badge = $('#notification-badge');
+        badge.text(unreadNotificationCount);
+        badge.toggle(unreadNotificationCount > 0);
+        
+        const markAllBtn = $('#mark-all-read-btn');
+        markAllBtn.toggle(unreadNotificationCount > 0);
+    }
+
+    function markNotificationAsRead(id) {
+        $.ajax({
+            url: `/api/ThongBao/${id}/read`,
+            type: 'PUT',
+            success: function() {
+                const item = $(`#notification-list [data-id="${id}"]`);
+                item.removeClass('bg-light');
+                updateNotificationBadge();
+            }
+        });
+    }
+
+    function markAllNotificationsAsRead() {
+        $.ajax({
+            url: '/api/ThongBao/read-all',
+            type: 'PUT',
+            success: function() {
+                $('#notification-list .bg').removeClass('bg-light');
+                updateNotificationBadge();
+                $('#mark-all-read-btn').hide();
+            }
+        });
+    }
+
+    // Click on notification to mark as read
+    $(document).on('click', '#notification-list .dropdown-item', function() {
+        const id = $(this).data('id');
+        if (!$(this).hasClass('bg-light')) {
+            markNotificationAsRead(id);
+        }
+    });
+
+    // Mark all as read button
+    $('#mark-all-read-btn').click(markAllNotificationsAsRead);
+
+    // Load latest notifications on page load
+    loadLatestNotifications();
+
+    // Refresh notifications every 30 seconds
+    setInterval(loadLatestNotifications, 30000);
+
+    // Setup SignalR for real-time notification updates
+    notificationConnection = new signalR.HubConnectionBuilder()
+        .withUrl("/notificationHub")
+        .build();
+
+    notificationConnection.on("NhanThongBao", (data) => {
+        // Prepend new notification to dropdown
+        const date = new Date(data.ngayTao);
+        const formattedDate = date.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        
+        const item = `
+            <li class="dropdown-item bg-light border-0 border-bottom" data-id="${data.id}">
+                <div class="d-flex w-100 justify-content-between">
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-danger p-1 me-2" style="font-size: 0.6rem;">
+                                <i class="fa-solid fa-circle" style="font-size: 0.5rem;"></i>
+                            </span>
+                            <span class="fw-medium small">${data.noiDung}</span>
+                        </div>
+                        <small class="text-muted ms-4">${formattedDate}</small>
+                    </div>
+                </div>
+            </li>
+        `;
+        
+        const list = $('#notification-list');
+        list.prepend(item);
+        list.find('#notification-empty').hide();
+        updateNotificationBadge();
+    });
+
+    notificationConnection.start()
+        .then(() => console.log('Notification SignalR connected'))
+        .catch(err => console.error('Notification SignalR connection error:', err));
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
