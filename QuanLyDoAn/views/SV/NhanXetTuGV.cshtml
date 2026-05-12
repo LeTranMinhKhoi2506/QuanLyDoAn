@@ -1,0 +1,119 @@
+@model QuanLyDoAn.Models.DeTai
+@{
+    ViewData["Title"] = "Nhận xét và Điểm số";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="d-flex align-items-center mb-4">
+        <i class="fa-solid fa-comments fs-2 text-primary me-3"></i>
+        <div>
+            <h2 class="h3 mb-0 text-gray-800">Nhận xét & Điểm số</h2>
+            <p class="text-muted mb-0 small">Kết quả đánh giá Đồ án rèn luyện / Khóa luận tốt nghiệp</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- ĐIỂM SỐ -->
+        <div class="col-lg-5 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3 border-bottom-0">
+                    <h5 class="fw-bold mb-0 text-success"><i class="fa-solid fa-star me-2"></i>Điểm số cuối kỳ</h5>
+                </div>
+                <div class="card-body">
+                    @{
+                        double? dtHuongDan = Model.DiemHuongDan;
+                        double? dtPhanBien = Model.DiemPhanBien;
+                        double? dtHoiDong = Model.DiemHoiDong;
+
+                        double diemTb = 0;
+                        int divisor = 0;
+                        if(dtHuongDan.HasValue) { diemTb += dtHuongDan.Value; divisor++; }
+                        if(dtPhanBien.HasValue) { diemTb += dtPhanBien.Value; divisor++; }
+                        if(dtHoiDong.HasValue) { diemTb += dtHoiDong.Value; divisor++; }
+
+                        double kqHoiDongSum = divisor > 0 ? Math.Round(diemTb / divisor, 2) : 0;
+                    }
+
+                    <ul class="list-group list-group-flush mb-4">
+                        <li class="list-group-item d-flex justify-content-between px-0 py-3">
+                            <span class="text-muted fw-bold">Điểm Giáo viên HD:</span>
+                            <span class="fw-bold fs-5 @(dtHuongDan.HasValue ? "text-dark" : "text-muted")">
+                                @(dtHuongDan.HasValue ? dtHuongDan.ToString() : "--")
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0 py-3">
+                            <span class="text-muted fw-bold">Điểm Giáo viên Phản biện:</span>
+                            <span class="fw-bold fs-5 @(dtPhanBien.HasValue ? "text-dark" : "text-muted")">
+                                @(dtPhanBien.HasValue ? dtPhanBien.ToString() : "--")
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0 py-3">
+                            <span class="text-muted fw-bold">Điểm Hội đồng:</span>
+                            <span class="fw-bold fs-5 @(dtHoiDong.HasValue ? "text-dark" : "text-muted")">
+                                @(dtHoiDong.HasValue ? dtHoiDong.ToString() : "--")
+                            </span>
+                        </li>
+                    </ul>
+
+                    <div class="bg-success text-white p-3 rounded text-center shadow-sm">
+                        <div class="small fw-semibold opacity-75 mb-1">ĐIỂM TRUNG BÌNH TỔNG</div>
+                        <div class="display-3 fw-bold">
+                            @(divisor > 0 ? kqHoiDongSum.ToString("0.0") : "--")
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NHẬN XÉT -->
+        <div class="col-lg-7 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3 border-bottom-0">
+                    <h5 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-chalkboard-user me-2"></i>Đánh giá từ Hội Đồng / GV</h5>
+                </div>
+                <div class="card-body">
+
+                    <div class="mb-4">
+                        <h6 class="fw-bold fs-6 text-muted mb-2">Trạng thái Tốt nghiệp</h6>
+                        <span class="badge @(Model.TrangThai == "Hoàn thành" ? "bg-success" : Model.TrangThai == "Bị từ chối" ? "bg-danger" : "bg-warning text-dark") fs-5 px-4 py-2">
+                           Trạng thái: @Model.TrangThai
+                        </span>
+                    </div>
+
+                    @if(!string.IsNullOrEmpty(Model.LyDoTuChoi))
+                    {
+                        <div class="alert alert-danger shadow-sm border-0 border-start border-4 border-danger mb-4">
+                            <h6 class="alert-heading fw-bold"><i class="fa-solid fa-ban me-1"></i> Lý do từ chối:</h6>
+                            <p class="mb-0">@Model.LyDoTuChoi</p>
+                        </div>
+                    }
+
+                    <!-- Tiến độ & Comments -->
+                    <h6 class="fw-bold fs-6 text-muted mb-3 border-bottom pb-2">Nhận xét theo luồng tiến độ làm việc</h6>
+                    <div class="timeline ps-2 border-start border-2 border-primary ms-3">
+                        @if(Model.TienDos != null && Model.TienDos.Any(t => !string.IsNullOrEmpty(t.NhanXetCuaGiangVien)))
+                        {
+                            foreach (var hd in Model.TienDos.Where(t => !string.IsNullOrEmpty(t.NhanXetCuaGiangVien)).OrderByDescending(t => t.NgayCapNhat))
+                            {
+                                <div class="position-relative mb-4 ps-4">
+                                    <div class="position-absolute bg-primary rounded-circle" style="width: 15px; height: 15px; left: -9px; top: 5px;"></div>
+                                    <div class="fw-bold d-block mb-1">Cột mốc: @hd.TenCongViec</div>
+                                    <div class="small text-muted mb-2"><i class="fa-regular fa-clock me-1"></i>@hd.NgayCapNhat.ToString("dd/MM/yyyy HH:mm")</div>
+                                    <div class="bg-light p-3 rounded">
+                                        <div class="fst-italic">"@hd.NhanXetCuaGiangVien"</div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="alert alert-light text-center fst-italic text-muted">Chưa có nhận xét tiến độ nào được ghi nhận từ giảng viên.</div>
+                        }
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
