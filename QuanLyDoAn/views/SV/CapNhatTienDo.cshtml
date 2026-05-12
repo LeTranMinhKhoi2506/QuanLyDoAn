@@ -1,0 +1,156 @@
+@model IEnumerable<QuanLyDoAn.Models.TienDo>
+@{
+    ViewData["Title"] = "Cập nhật tiến độ";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2><i class="fa-solid fa-tasks me-2 text-primary"></i>Cập nhật tiến độ Đồ án</h2>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-warning mt-3">@TempData["Message"]</div>
+    }
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success mt-3">@TempData["SuccessMessage"]</div>
+    }
+
+    <!-- Nút mở Modal Thêm Mới -->
+    <div class="d-flex justify-content-end mb-3">
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addTienDoModal">
+            <i class="fa-solid fa-plus me-1"></i> Báo cáo tiến độ mới
+        </button>
+    </div>
+
+    <!-- Danh sách tiến độ tải thành Timeline -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            @if (Model == null || !Model.Any())
+            {
+                <div class="alert alert-secondary mb-0">Chưa có bản ghi tiến độ nào. Hãy bắt đầu báo cáo công việc của bạn.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Ngày báo cáo</th>
+                                <th>Tên công việc</th>
+                                <th>Tiến độ</th>
+                                <th>File đính kèm</th>
+                                <th>GV Nhận xét</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.NgayCapNhat.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td class="fw-bold">
+                                        @item.TenCongViec
+                                        <div class="small fw-normal text-muted mt-1">@item.NoiDungDaLam</div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress flex-grow-1 me-2" style="height: 10px;">
+                                                <div class="progress-bar @(item.PhanTramHoanThanh < 50 ? "bg-warning" : item.PhanTramHoanThanh == 100 ? "bg-success" : "bg-primary")" 
+                                                     role="progressbar" 
+                                                     style="width: @item.PhanTramHoanThanh%;" 
+                                                     aria-valuenow="@item.PhanTramHoanThanh" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <span class="small fw-bold">@item.PhanTramHoanThanh%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.FileMinhChung))
+                                        {
+                                            <a href="@Url.Content(item.FileMinhChung)" target="_blank" class="btn btn-sm btn-outline-info"><i class="fa-solid fa-download me-1"></i>Tải file</a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted fst-italic small">Không có</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.NhanXetCuaGiangVien))
+                                        {
+                                            <span class="badge bg-success" role="button" data-bs-toggle="tooltip" title="@item.NhanXetCuaGiangVien">Có nhận xét</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Chưa có</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <!-- Form xóa (xóa nhanh thông qua Post ẩn) -->
+                                        <form asp-action="XoaTienDo" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa bản ghi này?');">
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" @(!string.IsNullOrEmpty(item.NhanXetCuaGiangVien) ? "disabled" : "")>
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm Tiến Độ -->
+<div class="modal fade" id="addTienDoModal" tabindex="-1" aria-labelledby="addTienDoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="CapNhatTienDo" method="post" enctype="multipart/form-data">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="addTienDoModalLabel">Thêm Mới Bản Ghi Tiến Độ</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="DeTaiId" value="@ViewBag.DeTaiId" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tên công việc <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="TenCongViec" required placeholder="VD: Tìm hiểu ASP.NET, Viết báo cáo chương 1..." />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nội dung chi tiết đã làm <span class="text-danger">*</span></label>
+                        <textarea class="form-control" name="NoiDungDaLam" rows="3" required placeholder="Mô tả các nội dung giải pháp, vấn đề gặp phải..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tiến độ công việc (%) <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" name="PhanTramHoanThanh" min="0" max="100" required value="10" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">File minh chứng (tuỳ chọn)</label>
+                        <input type="file" class="form-control" name="uploadFile" />
+                        <div class="form-text">Bạn có thể chọn tài liệu word, pdf hoặc file định dạng ảnh.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save me-1"></i>Lưu báo cáo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Kéo tooltip của Bootstrap
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
+}

@@ -163,26 +163,298 @@ public class SVController : Controller
     }
 
     // 3. Cập nhật tiến độ
-    public IActionResult CapNhatTienDo()
+    public async Task<IActionResult> CapNhatTienDo()
     {
-        return View();
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out int userId))
+        {
+             return RedirectToAction("Login", "Account");
+        }
+
+        var sinhVien = await _context.SinhViens.FirstOrDefaultAsync(s => s.UserId == userId);
+        if (sinhVien == null) return NotFound("Student profile not found.");
+
+        var deTai = await _context.DeTais
+            .Include(d => d.TienDos)
+            .FirstOrDefaultAsync(d => d.SinhVienId == sinhVien.Id);
+
+        if (deTai == null)
+        {
+            TempData["Message"] = "Bạn chưa có đề tài, không thể cập nhật tiến độ.";
+            return RedirectToAction(nameof(DeTaiCuaToi));
+        }
+
+        // Truyền Id của đề tài hiện tại sang View để có thể thêm mới tiến độ
+        ViewBag.DeTaiId = deTai.Id;
+        return View(deTai.TienDos.OrderByDescending(t => t.NgayCapNhat).ToList());
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CapNhatTienDo(TienDo model, IFormFile? uploadFile)
+    {
+        var deTai = await _context.DeTais.FindAsync(model.DeTaiId);
+        if (deTai == null) return NotFound("Đề tài không tồn tại.");
+
+        // Xử lý upload file minh chứng (nếu có)
+        if (uploadFile != null && uploadFile.Length > 0)
+        {
+            var fileName = Path.GetFileName(uploadFile.FileName);
+            var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+            var uniqueFileName = $"{timestamp}_{fileName}";
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "minhchung");
+
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await uploadFile.CopyToAsync(fileStream);
+            }
+            model.FileMinhChung = $"/uploads/minhchung/{uniqueFileName}";
+        }
+
+        // Cập nhật các trường bắt buộc
+        model.NgayCapNhat = DateTime.Now;
+
+        _context.TienDos.Add(model);
+        await _context.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "Cập nhật tiến độ thành công.";
+        return RedirectToAction(nameof(CapNhatTienDo));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> XoaTienDo(int id)
+    {
+        var tienDo = await _context.TienDos.FindAsync(id);
+        if (tienDo != null)
+        {
+            _context.TienDos.Remove(tienDo);
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Bạn đã xóa 1 bản ghi tiến độ thành công.";
+        }
+        return RedirectToAction(nameof(CapNhatTienDo));
     }
 
     // 4. Nộp báo cáo
-    public IActionResult NopBaoCao()
+    [HttpGet]
+    public async Task<IActionResult> NopBaoCao()
     {
-        return View();
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out int userId))
+        {
+             return RedirectToAction("Login", "Account");
+        }
+
+        var sinhVien = await _context.SinhViens.FirstOrDefaultAsync(s => s.UserId == userId);
+        if (sinhVien == null) return NotFound("Student profile not found.");
+
+        var deTai = await _context.DeTais
+            .FirstOrDefaultAsync(d => d.SinhVienId == sinhVien.Id);
+
+        if (deTai == null)
+        {
+            TempData["Message"] = "Bạn chưa có đề tài, không thể nộp báo cáo.";
+            return RedirectToAction(nameof(DeTaiCuaToi));
+        }
+
+        return View(deTai);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> NopBaoCao(
+        string? LinkGitHub, 
+        string? LinkDemo, 
+        IFormFile? FileBaoCao, 
+        IFormFile? FileSlide, 
+        IFormFile? FileSourceCode)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out int userId))
+        {
+             return RedirectToAction("Login", "Account");
+        }
+
+        var sinhVien = await _context.SinhViens.FirstOrDefaultAsync(s => s.UserId == userId);
+        if (sinhVien == null) return NotFound("Student profile not found.");
+
+        var deTai = await _context.DeTais.FirstOrDefaultAsync(d => d.SinhVienId == sinhVien.Id);
+        if (deTai == null) return NotFound("Đề tài không tồn tại.");
+
+        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "baocao");
+        if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+        // Upload File báo cáo
+        if (FileBaoCao != null && FileBaoCao.Length > 0)
+        {
+            var fileName = $"BaoCao_{sinhVien.MaSinhVien}_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}{Path.GetExtension(FileBaoCao.FileName)}";
+            var filePath = Path.Combine(uploadsFolder, fileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await FileBaoCao.CopyToAsync(stream);
+            }
+            deTai.FileBaoCao = $"/uploads/baocao/{fileName}";
+        }
+
+        // Upload File Slide
+        if (FileSlide != null && FileSlide.Length > 0)
+        {
+            var fileName = $"Slide_{sinhVien.MaSinhVien}_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}{Path.GetExtension(FileSlide.FileName)}";
+            var filePath = Path.Combine(uploadsFolder, fileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await FileSlide.CopyToAsync(stream);
+            }
+            deTai.FileSlide = $"/uploads/baocao/{fileName}";
+        }
+
+        // Upload File Source Code (zip/rar)
+        if (FileSourceCode != null && FileSourceCode.Length > 0)
+        {
+            var fileName = $"SourceCode_{sinhVien.MaSinhVien}_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}{Path.GetExtension(FileSourceCode.FileName)}";
+            var filePath = Path.Combine(uploadsFolder, fileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await FileSourceCode.CopyToAsync(stream);
+            }
+            deTai.FileSourceCode = $"/uploads/baocao/{fileName}";
+        }
+
+        if (LinkGitHub != null) deTai.LinkGitHub = LinkGitHub;
+        if (LinkDemo != null) deTai.LinkDemo = LinkDemo;
+
+        // Cập nhật trạng thái
+        deTai.TrangThai = "Đã nộp báo cáo";
+
+        await _context.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "Nộp báo cáo thành công!";
+        return RedirectToAction(nameof(NopBaoCao));
     }
 
     // 5. Nhận xét từ giảng viên
-    public IActionResult NhanXetTuGV()
+    [HttpGet]
+    public async Task<IActionResult> NhanXetTuGV()
     {
-        return View();
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out int userId))
+        {
+             return RedirectToAction("Login", "Account");
+        }
+
+        var sinhVien = await _context.SinhViens.FirstOrDefaultAsync(s => s.UserId == userId);
+        if (sinhVien == null) return NotFound("Student profile not found.");
+
+        var deTai = await _context.DeTais
+            .Include(d => d.GiangVien)
+            .Include(d => d.HoiDong)
+            .Include(d => d.TienDos)
+            .FirstOrDefaultAsync(d => d.SinhVienId == sinhVien.Id);
+
+        if (deTai == null)
+        {
+            TempData["Message"] = "Bạn chưa có đề tài, không thể xem nhận xét.";
+            return RedirectToAction(nameof(DeTaiCuaToi));
+        }
+
+        return View(deTai);
     }
 
     // 6. Lịch gặp giảng viên
-    public IActionResult LichGapGiangVien()
+    [HttpGet]
+    public async Task<IActionResult> LichGapGiangVien()
     {
-        return View();
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out int userId))
+        {
+             return RedirectToAction("Login", "Account");
+        }
+
+        var sinhVien = await _context.SinhViens.FirstOrDefaultAsync(s => s.UserId == userId);
+        if (sinhVien == null) return NotFound("Student profile not found.");
+
+        var deTai = await _context.DeTais
+            .Include(d => d.GiangVien)
+            .FirstOrDefaultAsync(d => d.SinhVienId == sinhVien.Id);
+
+        if (deTai == null || deTai.GiangVienId == null)
+        {
+            TempData["Message"] = "Bạn chưa có đề tài hoặc chưa được phân công giảng viên hướng dẫn.";
+            return RedirectToAction(nameof(DeTaiCuaToi));
+        }
+
+        // Lấy danh sách lịch hẹn của sinh viên này
+        var lichGaps = await _context.LichGaps
+            .Include(l => l.GiangVien)
+            .Where(l => l.SinhVienId == sinhVien.Id)
+            .OrderByDescending(l => l.NgayGioGap)
+            .ToListAsync();
+
+        ViewBag.DeTai = deTai;
+        return View(lichGaps);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> XinLichGap([FromForm] LichGap model)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out int userId))
+        {
+             return RedirectToAction("Login", "Account");
+        }
+
+        var sinhVien = await _context.SinhViens.FirstOrDefaultAsync(s => s.UserId == userId);
+        if (sinhVien == null) return NotFound("Student profile not found.");
+
+        var deTai = await _context.DeTais.FirstOrDefaultAsync(d => d.SinhVienId == sinhVien.Id);
+        if (deTai == null || deTai.GiangVienId == null) return NotFound("Không tìm thấy giảng viên.");
+
+        // Remove those fields from modelstate checks because we assign them programatically
+        ModelState.Remove("SinhVien");
+        ModelState.Remove("GiangVien");
+
+        if (ModelState.IsValid)
+        {
+            model.SinhVienId = sinhVien.Id;
+            model.GiangVienId = deTai.GiangVienId.Value;
+            model.TrangThai = "Chờ duyệt"; // Mới tạo mặc định là Chờ duyệt
+
+            _context.LichGaps.Add(model);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Đăng ký xin hẹn lịch thành công. Vui lòng chờ Giảng viên xác nhận.";
+        }
+        else
+        {
+            // Trả về lỗi model validation chi tiết
+            var errorMsgs = string.Join(" | ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+            TempData["Message"] = "Vui lòng nhập đầy đủ thông tin hợp lệ. Chi tiết: " + errorMsgs;
+        }
+
+        return RedirectToAction(nameof(LichGapGiangVien));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> HuyLichGap(int id)
+    {
+        var lich = await _context.LichGaps.FindAsync(id);
+        if (lich == null) return NotFound();
+
+        // Chỉ cho phép sinh viên xoá/hủy các lịch đang chờ duyệt. Lịch đã duyệt không được tự ý xóa
+        if (lich.TrangThai == "Chờ duyệt")
+        {
+            _context.LichGaps.Remove(lich);
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Đã hủy yêu cầu hẹn thành công.";
+        }
+        else
+        {
+            TempData["Message"] = "Không thể xóa lịch đã được xử lý. Hãy liên hệ trực tiếp giảng viên.";
+        }
+
+        return RedirectToAction(nameof(LichGapGiangVien));
     }
 }
