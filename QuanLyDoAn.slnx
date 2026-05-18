@@ -1,4 +1,6 @@
 <Solution>
-  <Project Path="QuanLyDoAn/QuanLyDoAn.csproj" />
-  <Project Path="QuanLyDoAn.Tests/QuanLyDoAn.Tests.csproj" />
+  <Project Path="../../../../../../source/repos/QuanLyDoAn/QuanLyDoAn.Tests/QuanLyDoAn.Tests.csproj" Id="fe723083-fa75-793e-db23-2f9cddb811ec">
+    <Build Solution="Debug|*" Project="false" />
+  </Project>
+  <Project Path="../../../../../../source/repos/QuanLyDoAn/QuanLyDoAn/QuanLyDoAn.csproj" />
 </Solution>
