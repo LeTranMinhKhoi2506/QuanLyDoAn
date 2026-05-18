@@ -16,7 +16,11 @@ public class GiangVienController : Controller
     // GET: /GiangVien/Manage
     public async Task<IActionResult> Manage(string search)
     {
-        var query = _context.GiangViens.Include(g => g.User).AsQueryable();
+        var query = _context.GiangViens
+            .Include(g => g.User)
+            .Include(g => g.DeTaisHuongDan)
+            .ThenInclude(d => d.SinhVien)
+            .AsQueryable();
 
         if (!string.IsNullOrEmpty(search))
             query = query.Where(g =>

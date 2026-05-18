@@ -1,0 +1,73 @@
+@model IEnumerable<QuanLyDoAn.Models.DotDoAn>
+@{
+    ViewData["Title"] = "Thông tin Đợt Đồ Án";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2><i class="fa-solid fa-calendar-alt me-2 text-primary"></i>Danh sách Đợt Đồ Án</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">Hiện tại không có đợt đồ án nào.</div>
+    }
+    else
+    {
+        <div class="row mt-4">
+            @foreach (var dot in Model)
+            {
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm h-100 border-0 @(dot.TrangThai == "Đang mở" ? "border-primary border-start border-4" : "")">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 fw-bold">@dot.TenDot</h5>
+                            <span class="badge @(dot.TrangThai == "Đang mở" ? "bg-success" : dot.TrangThai == "Đã đóng" ? "bg-secondary" : "bg-danger")">
+                                @dot.TrangThai
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted mb-3">@dot.MoTa</p>
+                            
+                            <ul class="list-group list-group-flush mb-3">
+                                <li class="list-group-item px-0 d-flex justify-content-between">
+                                    <span class="text-muted"><i class="fa-solid fa-clock me-2"></i>Thời gian thực hiện:</span>
+                                    <strong>@dot.NgayBatDau.ToString("dd/MM/yyyy") - @dot.NgayKetThuc.ToString("dd/MM/yyyy")</strong>
+                                </li>
+                                <li class="list-group-item px-0 d-flex justify-content-between">
+                                    <span class="text-muted"><i class="fa-solid fa-pen-nib me-2"></i>Hạn đăng ký đề tài:</span>
+                                    <strong class="text-danger">@dot.HanDangKyDeTai.ToString("dd/MM/yyyy")</strong>
+                                </li>
+                                <li class="list-group-item px-0 d-flex justify-content-between">
+                                    <span class="text-muted"><i class="fa-solid fa-file-pdf me-2"></i>Hạn nộp báo cáo:</span>
+                                    <strong class="text-danger">@dot.HanNopBaoCao.ToString("dd/MM/yyyy")</strong>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-footer bg-light p-3">
+                            @if (dot.DangMoDangKy || dot.TrangThai == "Đang mở")
+                            {
+                                @if (DateTime.Now <= dot.HanDangKyDeTai)
+                                {
+                                    <a href="@Url.Action("DangKyDeXuat", "SV")" class="btn btn-primary w-100">
+                                        <i class="fa-solid fa-pen-to-square me-1"></i> Đăng ký đề tài đợt này
+                                    </a>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-secondary w-100" disabled>
+                                        <i class="fa-solid fa-lock me-1"></i> Đã hết hạn đăng ký
+                                    </button>
+                                }
+                            }
+                            else
+                            {
+                                <button class="btn btn-secondary w-100" disabled>
+                                    <i class="fa-solid fa-lock me-1"></i> Đã đóng
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

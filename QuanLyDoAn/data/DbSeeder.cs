@@ -78,148 +78,174 @@ public static class DbSeeder
         // === ĐỢT ĐỒ ÁN ===
         var dotHienTai = new DotDoAn
         {
-            TenDot = "Đồ án tốt nghiệp HK2 2024-2025",
+            TenDot = "Đồ án (Còn hạn đăng ký)",
             LoaiDot = "Đồ án",
             HocKy = "HK2",
-            NamHoc = "2024-2025",
-            NgayBatDau = new DateTime(2025, 1, 15),
-            NgayKetThuc = new DateTime(2025, 6, 30),
-            HanDangKyDeTai = new DateTime(2025, 2, 15),
-            HanNopBaoCao = new DateTime(2025, 6, 15),
+            NamHoc = $"{DateTime.Now.Year}-{DateTime.Now.Year + 1}",
+            NgayBatDau = DateTime.Now.AddDays(-10),
+            NgayKetThuc = DateTime.Now.AddDays(90),
+            HanDangKyDeTai = DateTime.Now.AddDays(15),
+            HanNopBaoCao = DateTime.Now.AddDays(75),
             TrangThai = "Đang mở",
             DangMoDangKy = true,
-            MoTa = "Đợt đồ án tốt nghiệp học kỳ 2 năm học 2024-2025"
+            MoTa = "Đợt đồ án đang trong thời gian đăng ký đề tài (Sinh viên có thể đăng ký, rút đề tài)"
         };
 
-        var dotCu = new DotDoAn
+        var dotQuaHanDangKy = new DotDoAn
         {
-            TenDot = "Đồ án tốt nghiệp HK1 2024-2025",
+            TenDot = "Đồ án (Hết hạn đăng ký)",
             LoaiDot = "Đồ án",
             HocKy = "HK1",
-            NamHoc = "2024-2025",
-            NgayBatDau = new DateTime(2024, 8, 1),
-            NgayKetThuc = new DateTime(2024, 12, 31),
-            HanDangKyDeTai = new DateTime(2024, 8, 31),
-            HanNopBaoCao = new DateTime(2024, 12, 15),
-            TrangThai = "Đã đóng",
-            DaKhoa = true,
-            MoTa = "Đợt đồ án tốt nghiệp học kỳ 1 năm học 2024-2025"
+            NamHoc = $"{DateTime.Now.Year}-{DateTime.Now.Year + 1}",
+            NgayBatDau = DateTime.Now.AddDays(-40),
+            NgayKetThuc = DateTime.Now.AddDays(60),
+            HanDangKyDeTai = DateTime.Now.AddDays(-10),
+            HanNopBaoCao = DateTime.Now.AddDays(45),
+            TrangThai = "Đang mở",
+            DangMoDangKy = true,
+            MoTa = "Đợt đồ án đã qua thời hạn đăng ký (Không thể rút đề tài chờ duyệt, không thể nộp lại nếu bị từ chối)"
         };
 
-        await db.DotDoAns.AddRangeAsync(dotHienTai, dotCu);
+        var dotDaDong = new DotDoAn
+        {
+            TenDot = "Đồ án (Đã đóng)",
+            LoaiDot = "Đồ án",
+            HocKy = "HK3",
+            NamHoc = $"{DateTime.Now.Year - 1}-{DateTime.Now.Year}",
+            NgayBatDau = DateTime.Now.AddDays(-200),
+            NgayKetThuc = DateTime.Now.AddDays(-100),
+            HanDangKyDeTai = DateTime.Now.AddDays(-180),
+            HanNopBaoCao = DateTime.Now.AddDays(-120),
+            TrangThai = "Đã đóng",
+            DaKhoa = true,
+            MoTa = "Đợt đồ án cũ đã kết thúc"
+        };
+
+        await db.DotDoAns.AddRangeAsync(dotHienTai, dotQuaHanDangKy, dotDaDong);
         await db.SaveChangesAsync();
 
         // === ĐỀ TÀI ===
         var deTais = new List<DeTai>
         {
             new() {
-                MaDeTai = "DT001", TenDeTai = "Xây dựng hệ thống quản lý bán hàng online",
-                MoTaDeTai = "Phát triển website thương mại điện tử với ASP.NET Core và React",
-                LoaiDeTai = "Đồ án", CongNgheSuDung = "ASP.NET Core, React, SQL Server",
+                // SV01: Đang thực hiện, Dot còn hạn đăng ký
+                MaDeTai = "DT001", TenDeTai = "Hệ thống quản lý bán hàng (SV01)",
+                MoTaDeTai = "Phát triển website thương mại điện tử với ASP.NET Core",
+                LoaiDeTai = "Đồ án", CongNgheSuDung = "ASP.NET Core",
                 TrangThai = "Đang thực hiện",
-                NgayBatDau = new DateTime(2025, 2, 1), NgayKetThuc = new DateTime(2025, 6, 30),
-                NgayDuyet = new DateTime(2025, 2, 10),
+                NgayBatDau = dotHienTai.NgayBatDau, NgayKetThuc = dotHienTai.NgayKetThuc,
+                NgayDuyet = DateTime.Now.AddDays(-2),
                 SinhVienId = sinhViens[0].Id, GiangVienId = giangViens[0].Id, DotDoAnId = dotHienTai.Id
             },
             new() {
-                MaDeTai = "DT002", TenDeTai = "Ứng dụng quản lý thư viện số",
-                MoTaDeTai = "Xây dựng hệ thống quản lý thư viện với tính năng mượn/trả sách online",
-                LoaiDeTai = "Đồ án", CongNgheSuDung = "Spring Boot, Angular, MySQL",
+                // SV02: Đã nộp báo cáo, Dot hết hạn đăng ký
+                MaDeTai = "DT002", TenDeTai = "Ứng dụng thư viện (SV02)",
+                MoTaDeTai = "Hệ thống quản lý thư viện số",
+                LoaiDeTai = "Đồ án", CongNgheSuDung = "Spring Boot",
                 TrangThai = "Đã nộp báo cáo",
-                NgayBatDau = new DateTime(2025, 2, 1), NgayKetThuc = new DateTime(2025, 6, 30),
-                NgayDuyet = new DateTime(2025, 2, 10),
-                SinhVienId = sinhViens[1].Id, GiangVienId = giangViens[0].Id, DotDoAnId = dotHienTai.Id,
+                NgayBatDau = dotQuaHanDangKy.NgayBatDau, NgayKetThuc = dotQuaHanDangKy.NgayKetThuc,
+                NgayDuyet = DateTime.Now.AddDays(-30),
+                SinhVienId = sinhViens[1].Id, GiangVienId = giangViens[0].Id, DotDoAnId = dotQuaHanDangKy.Id,
                 FileBaoCao = "baocao_dt002.pdf", FileSlide = "slide_dt002.pptx",
                 LinkGitHub = "https://github.com/sv02/library-app"
             },
             new() {
-                MaDeTai = "DT003", TenDeTai = "Hệ thống nhận diện khuôn mặt điểm danh",
-                MoTaDeTai = "Ứng dụng AI nhận diện khuôn mặt để điểm danh tự động",
-                LoaiDeTai = "Đồ án", CongNgheSuDung = "Python, OpenCV, Flask, React",
+                // SV03: Chờ duyệt, Dot còn hạn đăng ký -> Có thể RÚT đề tài
+                MaDeTai = "DT003", TenDeTai = "AI điểm danh (SV03 - Có thể rút)",
+                MoTaDeTai = "Nhận diện khuôn mặt điểm danh",
+                LoaiDeTai = "Đồ án", CongNgheSuDung = "Python, OpenCV",
                 TrangThai = "Chờ duyệt",
-                NgayBatDau = new DateTime(2025, 3, 1), NgayKetThuc = new DateTime(2025, 6, 30),
+                NgayBatDau = dotHienTai.NgayBatDau, NgayKetThuc = dotHienTai.NgayKetThuc,
                 SinhVienId = sinhViens[2].Id, GiangVienId = giangViens[3].Id, DotDoAnId = dotHienTai.Id
             },
             new() {
-                MaDeTai = "DT004", TenDeTai = "Chatbot hỗ trợ sinh viên bằng NLP",
-                MoTaDeTai = "Xây dựng chatbot tư vấn học vụ sử dụng xử lý ngôn ngữ tự nhiên",
-                LoaiDeTai = "Đồ án", CongNgheSuDung = "Python, Rasa, FastAPI, Vue.js",
-                TrangThai = "Bị từ chối", LyDoTuChoi = "Đề tài quá rộng, cần thu hẹp phạm vi nghiên cứu",
-                NgayBatDau = new DateTime(2025, 2, 1), NgayKetThuc = new DateTime(2025, 6, 30),
-                SinhVienId = sinhViens[3].Id, GiangVienId = giangViens[1].Id, DotDoAnId = dotHienTai.Id
+                // SV04: Chờ duyệt, Dot HẾT hạn đăng ký -> KHÔNG THỂ rút đề tài
+                MaDeTai = "DT004", TenDeTai = "Chatbot NLP (SV04 - Không thể rút)",
+                MoTaDeTai = "Chatbot tư vấn sinh viên",
+                LoaiDeTai = "Đồ án", CongNgheSuDung = "Python, Rasa",
+                TrangThai = "Chờ duyệt",
+                NgayBatDau = dotQuaHanDangKy.NgayBatDau, NgayKetThuc = dotQuaHanDangKy.NgayKetThuc,
+                SinhVienId = sinhViens[3].Id, GiangVienId = giangViens[1].Id, DotDoAnId = dotQuaHanDangKy.Id
             },
             new() {
-                MaDeTai = "DT005", TenDeTai = "Ứng dụng đặt lịch khám bệnh trực tuyến",
-                MoTaDeTai = "Hệ thống đặt lịch khám bệnh với tích hợp thanh toán online",
-                LoaiDeTai = "Đồ án", CongNgheSuDung = "ASP.NET Core, Blazor, PostgreSQL",
+                // SV05: Yêu cầu chỉnh sửa, duyệt cách đây 1 ngày -> CÒN HẠN SỬA (3 ngày)
+                MaDeTai = "DT005", TenDeTai = "Đặt lịch khám (SV05 - Còn hạn sửa)",
+                MoTaDeTai = "Hệ thống đặt lịch y tế",
+                LoaiDeTai = "Đồ án", CongNgheSuDung = "ASP.NET Core",
                 TrangThai = "Yêu cầu chỉnh sửa",
-                NgayBatDau = new DateTime(2025, 2, 1), NgayKetThuc = new DateTime(2025, 6, 30),
-                NgayDuyet = new DateTime(2025, 2, 12),
-                SinhVienId = sinhViens[4].Id, GiangVienId = giangViens[2].Id, DotDoAnId = dotHienTai.Id
+                NgayBatDau = dotQuaHanDangKy.NgayBatDau, NgayKetThuc = dotQuaHanDangKy.NgayKetThuc,
+                NgayDuyet = DateTime.Now.AddDays(-1), // Mới duyệt hôm qua
+                SinhVienId = sinhViens[4].Id, GiangVienId = giangViens[2].Id, DotDoAnId = dotQuaHanDangKy.Id
             },
             new() {
-                MaDeTai = "DT006", TenDeTai = "Hệ thống quản lý nhân sự doanh nghiệp",
-                MoTaDeTai = "Phần mềm quản lý nhân sự, chấm công, tính lương",
-                LoaiDeTai = "Đồ án", CongNgheSuDung = "Java EE, JSF, Oracle DB",
-                TrangThai = "Đã hoàn thành",
-                NgayBatDau = new DateTime(2024, 8, 15), NgayKetThuc = new DateTime(2024, 12, 20),
-                NgayDuyet = new DateTime(2024, 8, 20),
-                SinhVienId = sinhViens[5].Id, GiangVienId = giangViens[1].Id, DotDoAnId = dotCu.Id,
-                DiemHuongDan = 8.5, DiemPhanBien = 8.0, DiemHoiDong = 8.2,
-                FileBaoCao = "baocao_dt006.pdf", FileSlide = "slide_dt006.pptx",
-                LinkGitHub = "https://github.com/sv06/hrm-system"
+                // SV06: Yêu cầu chỉnh sửa, duyệt cách đây 5 ngày -> QUÁ HẠN SỬA (3 ngày)
+                MaDeTai = "DT006", TenDeTai = "Quản lý nhân sự (SV06 - Hết hạn sửa)",
+                MoTaDeTai = "Phần mềm HR",
+                LoaiDeTai = "Đồ án", CongNgheSuDung = "Java",
+                TrangThai = "Yêu cầu chỉnh sửa",
+                NgayBatDau = dotQuaHanDangKy.NgayBatDau, NgayKetThuc = dotQuaHanDangKy.NgayKetThuc,
+                NgayDuyet = DateTime.Now.AddDays(-5), // Đã duyệt 5 ngày trước
+                SinhVienId = sinhViens[5].Id, GiangVienId = giangViens[1].Id, DotDoAnId = dotQuaHanDangKy.Id
             },
             new() {
-                MaDeTai = "DT007", TenDeTai = "Website học trực tuyến E-Learning",
-                MoTaDeTai = "Nền tảng học trực tuyến với video bài giảng và bài kiểm tra",
-                LoaiDeTai = "Đồ án", CongNgheSuDung = "Node.js, Express, MongoDB, React",
-                TrangThai = "Đang thực hiện",
-                NgayBatDau = new DateTime(2025, 2, 5), NgayKetThuc = new DateTime(2025, 6, 30),
-                NgayDuyet = new DateTime(2025, 2, 15),
-                SinhVienId = sinhViens[6].Id, GiangVienId = giangViens[2].Id, DotDoAnId = dotHienTai.Id
+                // SV07: Bị từ chối, Dot HẾT hạn đăng ký -> KHÔNG THỂ gửi lại
+                MaDeTai = "DT007", TenDeTai = "E-Learning (SV07 - Hết hạn đăng ký)",
+                MoTaDeTai = "Web học trực tuyến",
+                LoaiDeTai = "Đồ án", CongNgheSuDung = "Node.js",
+                TrangThai = "Bị từ chối", LyDoTuChoi = "Đề tài trùng lặp",
+                NgayBatDau = dotQuaHanDangKy.NgayBatDau, NgayKetThuc = dotQuaHanDangKy.NgayKetThuc,
+                NgayDuyet = DateTime.Now.AddDays(-1),
+                SinhVienId = sinhViens[6].Id, GiangVienId = giangViens[2].Id, DotDoAnId = dotQuaHanDangKy.Id
             },
             new() {
-                MaDeTai = "DT008", TenDeTai = "Ứng dụng mobile quản lý chi tiêu cá nhân",
-                MoTaDeTai = "App theo dõi thu chi, lập ngân sách và phân tích tài chính cá nhân",
-                LoaiDeTai = "Đồ án", CongNgheSuDung = "Flutter, Dart, Firebase",
-                TrangThai = "Đã duyệt",
-                NgayBatDau = new DateTime(2025, 3, 1), NgayKetThuc = new DateTime(2025, 6, 30),
-                NgayDuyet = new DateTime(2025, 2, 20),
+                // SV08: Bị từ chối, Dot CÒN hạn đăng ký -> CÓ THỂ gửi lại (sửa đổi)
+                MaDeTai = "DT008", TenDeTai = "App chi tiêu (SV08 - Có thể gửi lại)",
+                MoTaDeTai = "Quản lý tài chính",
+                LoaiDeTai = "Đồ án", CongNgheSuDung = "Flutter",
+                TrangThai = "Bị từ chối", LyDoTuChoi = "Cần thêm tính năng AI",
+                NgayBatDau = dotHienTai.NgayBatDau, NgayKetThuc = dotHienTai.NgayKetThuc,
+                NgayDuyet = DateTime.Now.AddDays(-1),
                 SinhVienId = sinhViens[7].Id, GiangVienId = giangViens[4].Id, DotDoAnId = dotHienTai.Id
             },
             new() {
-                MaDeTai = "DT009", TenDeTai = "Hệ thống IoT giám sát môi trường",
-                MoTaDeTai = "Thu thập và hiển thị dữ liệu cảm biến nhiệt độ, độ ẩm qua dashboard",
-                LoaiDeTai = "Đồ án", CongNgheSuDung = "Arduino, MQTT, Node-RED, InfluxDB, Grafana",
-                TrangThai = "Đang thực hiện",
-                NgayBatDau = new DateTime(2025, 2, 10), NgayKetThuc = new DateTime(2025, 6, 30),
-                NgayDuyet = new DateTime(2025, 2, 18),
+                // SV09: Đã duyệt (chưa có tiến độ)
+                MaDeTai = "DT009", TenDeTai = "IoT Môi trường (SV09)",
+                MoTaDeTai = "Giám sát bằng Arduino",
+                LoaiDeTai = "Đồ án", CongNgheSuDung = "Arduino",
+                TrangThai = "Đã duyệt",
+                NgayBatDau = dotHienTai.NgayBatDau, NgayKetThuc = dotHienTai.NgayKetThuc,
+                NgayDuyet = DateTime.Now.AddDays(-1),
                 SinhVienId = sinhViens[8].Id, GiangVienId = giangViens[3].Id, DotDoAnId = dotHienTai.Id
             },
             new() {
-                MaDeTai = "DT010", TenDeTai = "Phân tích cảm xúc bình luận mạng xã hội",
-                MoTaDeTai = "Áp dụng Machine Learning phân tích sentiment từ dữ liệu mạng xã hội",
-                LoaiDeTai = "Đồ án", CongNgheSuDung = "Python, scikit-learn, BERT, FastAPI",
-                TrangThai = "Chờ duyệt",
-                NgayBatDau = new DateTime(2025, 3, 5), NgayKetThuc = new DateTime(2025, 6, 30),
-                SinhVienId = sinhViens[9].Id, GiangVienId = giangViens[4].Id, DotDoAnId = dotHienTai.Id
+                // SV10: Đã hoàn thành, đợt cũ
+                MaDeTai = "DT010", TenDeTai = "Phân tích cảm xúc (SV10)",
+                MoTaDeTai = "NLP Model",
+                LoaiDeTai = "Đồ án", CongNgheSuDung = "Python",
+                TrangThai = "Đã hoàn thành",
+                NgayBatDau = dotDaDong.NgayBatDau, NgayKetThuc = dotDaDong.NgayKetThuc,
+                NgayDuyet = dotDaDong.NgayBatDau.AddDays(10),
+                SinhVienId = sinhViens[9].Id, GiangVienId = giangViens[4].Id, DotDoAnId = dotDaDong.Id,
+                DiemHuongDan = 8.5, DiemPhanBien = 8.0, DiemHoiDong = 8.2,
+                FileBaoCao = "baocao.pdf"
             }
         };
 
         await db.DeTais.AddRangeAsync(deTais);
         await db.SaveChangesAsync();
 
+        foreach (var gv in giangViens)
+        {
+            gv.SoLuongSinhVienDangHuongDan = await db.DeTais.CountAsync(d => d.GiangVienId == gv.Id && d.TrangThai == "Đang thực hiện" && !d.IsDeleted);
+        }
+        await db.SaveChangesAsync();
+
         // === TIẾN ĐỘ ===
         var tienDos = new List<TienDo>
         {
-            new() { DeTaiId = deTais[0].Id, TenCongViec = "Phân tích yêu cầu", NoiDungDaLam = "Hoàn thành tài liệu SRS", NgayCapNhat = new DateTime(2025, 2, 15), PhanTramHoanThanh = 100, NhanXetCuaGiangVien = "Tốt, tiếp tục thiết kế" },
-            new() { DeTaiId = deTais[0].Id, TenCongViec = "Thiết kế CSDL", NoiDungDaLam = "Hoàn thành ERD và schema", NgayCapNhat = new DateTime(2025, 3, 1), PhanTramHoanThanh = 100, NhanXetCuaGiangVien = "Cần bổ sung index cho các bảng lớn" },
-            new() { DeTaiId = deTais[0].Id, TenCongViec = "Lập trình backend", NoiDungDaLam = "Hoàn thành API quản lý sản phẩm và đơn hàng", NgayCapNhat = new DateTime(2025, 4, 10), PhanTramHoanThanh = 70 },
-            new() { DeTaiId = deTais[1].Id, TenCongViec = "Hoàn thiện báo cáo", NoiDungDaLam = "Nộp báo cáo đầy đủ", NgayCapNhat = new DateTime(2025, 5, 20), PhanTramHoanThanh = 100, NhanXetCuaGiangVien = "Báo cáo đạt yêu cầu" },
-            new() { DeTaiId = deTais[6].Id, TenCongViec = "Thiết kế UI/UX", NoiDungDaLam = "Hoàn thành wireframe và prototype", NgayCapNhat = new DateTime(2025, 3, 5), PhanTramHoanThanh = 100 },
-            new() { DeTaiId = deTais[6].Id, TenCongViec = "Phát triển tính năng video", NoiDungDaLam = "Tích hợp player và upload video", NgayCapNhat = new DateTime(2025, 4, 20), PhanTramHoanThanh = 60 },
-            new() { DeTaiId = deTais[8].Id, TenCongViec = "Lắp đặt phần cứng", NoiDungDaLam = "Kết nối cảm biến với Arduino", NgayCapNhat = new DateTime(2025, 3, 10), PhanTramHoanThanh = 100, NhanXetCuaGiangVien = "Hoàn thành đúng tiến độ" },
-            new() { DeTaiId = deTais[8].Id, TenCongViec = "Xây dựng dashboard", NoiDungDaLam = "Cấu hình Grafana hiển thị dữ liệu realtime", NgayCapNhat = new DateTime(2025, 4, 15), PhanTramHoanThanh = 80 },
+            new() { DeTaiId = deTais[0].Id, TenCongViec = "Phân tích yêu cầu", NoiDungDaLam = "Hoàn thành tài liệu SRS", NgayCapNhat = DateTime.Now.AddDays(-2), PhanTramHoanThanh = 20, NhanXetCuaGiangVien = "Tốt, tiếp tục thiết kế" },
+            new() { DeTaiId = deTais[1].Id, TenCongViec = "Lập trình backend", NoiDungDaLam = "Xong API", NgayCapNhat = DateTime.Now.AddDays(-15), PhanTramHoanThanh = 100, NhanXetCuaGiangVien = "Đã đạt" },
+            new() { DeTaiId = deTais[9].Id, TenCongViec = "Báo cáo cuối cùng", NoiDungDaLam = "Nộp báo cáo đầy đủ", NgayCapNhat = dotDaDong.HanNopBaoCao.AddDays(-5), PhanTramHoanThanh = 100, NhanXetCuaGiangVien = "Báo cáo đạt yêu cầu" }
         };
 
         await db.TienDos.AddRangeAsync(tienDos);
@@ -227,11 +253,8 @@ public static class DbSeeder
         // === LỊCH GẶP ===
         var lichGaps = new List<LichGap>
         {
-            new() { SinhVienId = sinhViens[0].Id, GiangVienId = giangViens[0].Id, NgayGioGap = new DateTime(2025, 5, 20, 9, 0, 0), NoiDung = "Báo cáo tiến độ tháng 5", HinhThuc = "Trực tiếp", TrangThai = "Chấp nhận", GhiChu = "Phòng A201" },
-            new() { SinhVienId = sinhViens[1].Id, GiangVienId = giangViens[0].Id, NgayGioGap = new DateTime(2025, 5, 21, 14, 0, 0), NoiDung = "Review báo cáo trước khi nộp", HinhThuc = "Online", TrangThai = "Chấp nhận", GhiChu = "Google Meet" },
-            new() { SinhVienId = sinhViens[2].Id, GiangVienId = giangViens[3].Id, NgayGioGap = new DateTime(2025, 5, 22, 10, 0, 0), NoiDung = "Thảo luận hướng tiếp cận", HinhThuc = "Trực tiếp", TrangThai = "Chờ duyệt" },
-            new() { SinhVienId = sinhViens[6].Id, GiangVienId = giangViens[2].Id, NgayGioGap = new DateTime(2025, 5, 23, 15, 0, 0), NoiDung = "Demo tính năng video", HinhThuc = "Online", TrangThai = "Chờ duyệt" },
-            new() { SinhVienId = sinhViens[8].Id, GiangVienId = giangViens[3].Id, NgayGioGap = new DateTime(2025, 5, 19, 9, 0, 0), NoiDung = "Kiểm tra phần cứng", HinhThuc = "Trực tiếp", TrangThai = "Từ chối", GhiChu = "GV bận họp, đổi lịch khác" },
+            new() { SinhVienId = sinhViens[0].Id, GiangVienId = giangViens[0].Id, NgayGioGap = DateTime.Now.AddDays(2), NoiDung = "Báo cáo tuần 1", HinhThuc = "Trực tiếp", TrangThai = "Chấp nhận", GhiChu = "Phòng A201" },
+            new() { SinhVienId = sinhViens[2].Id, GiangVienId = giangViens[3].Id, NgayGioGap = DateTime.Now.AddDays(3), NoiDung = "Hỏi về đề cương", HinhThuc = "Online", TrangThai = "Chờ duyệt" }
         };
 
         await db.LichGaps.AddRangeAsync(lichGaps);
@@ -241,16 +264,10 @@ public static class DbSeeder
         {
             TenHoiDong = "Hội đồng 1 - CNTT",
             MoTa = "Hội đồng chấm đồ án nhóm CNTT",
-            DotDoAnId = dotHienTai.Id
-        };
-        var hoiDong2 = new HoiDong
-        {
-            TenHoiDong = "Hội đồng 2 - HTTT",
-            MoTa = "Hội đồng chấm đồ án nhóm HTTT",
-            DotDoAnId = dotHienTai.Id
+            DotDoAnId = dotQuaHanDangKy.Id
         };
 
-        await db.HoiDongs.AddRangeAsync(hoiDong1, hoiDong2);
+        await db.HoiDongs.AddAsync(hoiDong1);
         await db.SaveChangesAsync();
 
         // Gán đề tài đã nộp báo cáo vào hội đồng
@@ -262,10 +279,7 @@ public static class DbSeeder
         {
             new() { HoiDongId = hoiDong1.Id, GiangVienId = giangViens[0].Id, VaiTro = "Chủ tịch" },
             new() { HoiDongId = hoiDong1.Id, GiangVienId = giangViens[1].Id, VaiTro = "Thư ký" },
-            new() { HoiDongId = hoiDong1.Id, GiangVienId = giangViens[2].Id, VaiTro = "Phản biện" },
-            new() { HoiDongId = hoiDong2.Id, GiangVienId = giangViens[3].Id, VaiTro = "Chủ tịch" },
-            new() { HoiDongId = hoiDong2.Id, GiangVienId = giangViens[4].Id, VaiTro = "Thư ký" },
-            new() { HoiDongId = hoiDong2.Id, GiangVienId = giangViens[1].Id, VaiTro = "Ủy viên" },
+            new() { HoiDongId = hoiDong1.Id, GiangVienId = giangViens[2].Id, VaiTro = "Phản biện" }
         };
 
         await db.HoiDongThanhViens.AddRangeAsync(thanhViens);
@@ -275,7 +289,7 @@ public static class DbSeeder
         {
             HoiDongId = hoiDong1.Id,
             DeTaiId = deTais[1].Id,
-            ThoiGianBaoVe = new DateTime(2025, 6, 20, 8, 0, 0),
+            ThoiGianBaoVe = dotQuaHanDangKy.HanNopBaoCao.AddDays(15),
             PhongBaoVe = "B301",
             GhiChu = "Sinh viên chuẩn bị slide và demo"
         };
@@ -285,12 +299,8 @@ public static class DbSeeder
         // === THÔNG BÁO ===
         var thongBaos = new List<ThongBao>
         {
-            new() { UserId = svUsers[0].Id, NoiDung = "Đề tài DT001 của bạn đã được duyệt", NgayTao = new DateTime(2025, 2, 10), DaDoc = true },
-            new() { UserId = svUsers[1].Id, NoiDung = "Đề tài DT002 của bạn đã được duyệt", NgayTao = new DateTime(2025, 2, 10), DaDoc = true },
-            new() { UserId = svUsers[1].Id, NoiDung = "Bạn đã được xếp vào Hội đồng 1, lịch bảo vệ ngày 20/06/2025", NgayTao = new DateTime(2025, 5, 15), DaDoc = false },
-            new() { UserId = svUsers[3].Id, NoiDung = "Đề tài DT004 bị từ chối. Lý do: Đề tài quá rộng, cần thu hẹp phạm vi", NgayTao = new DateTime(2025, 2, 14), DaDoc = true },
-            new() { UserId = svUsers[4].Id, NoiDung = "Đề tài DT005 yêu cầu chỉnh sửa, vui lòng xem phản hồi của giảng viên", NgayTao = new DateTime(2025, 3, 1), DaDoc = false },
-            new() { UserId = gvUsers[0].Id, NoiDung = "Có sinh viên mới đăng ký đề tài cần duyệt", NgayTao = new DateTime(2025, 3, 5), DaDoc = false },
+            new() { UserId = svUsers[0].Id, NoiDung = "Đề tài của bạn đã được duyệt", NgayTao = DateTime.Now.AddDays(-2), DaDoc = true },
+            new() { UserId = svUsers[4].Id, NoiDung = "Đề tài yêu cầu chỉnh sửa, hạn chót 3 ngày", NgayTao = DateTime.Now.AddDays(-1), DaDoc = false }
         };
 
         await db.ThongBaos.AddRangeAsync(thongBaos);

@@ -45,6 +45,8 @@ public class AppDbContext : DbContext
             .WithMany(s => s.DeTais)
             .HasForeignKey(d => d.SinhVienId);
 
+        modelBuilder.Entity<DeTai>().HasQueryFilter(d => !d.IsDeleted);
+
         modelBuilder.Entity<DeTai>()
             .HasOne(d => d.GiangVien)
             .WithMany(g => g.DeTaisHuongDan)

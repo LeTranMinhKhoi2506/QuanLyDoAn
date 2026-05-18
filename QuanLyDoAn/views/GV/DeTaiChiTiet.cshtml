@@ -66,11 +66,11 @@
                         </div>
                         <div class="col-sm-6 mb-3">
                             <h6 class="text-muted fw-bold mb-1">Ngày bắt đầu</h6>
-                            <p class="fs-5"><i class="fa-regular fa-calendar text-success me-2"></i> @Model.NgayBatDau.ToString("dd/MM/yyyy")</p>
+                            <p class="fs-5"><i class="fa-regular fa-calendar text-success me-2"></i> @(Model.NgayBatDau.Year > 1 ? Model.NgayBatDau.ToString("dd/MM/yyyy") : (Model.DotDoAn != null ? Model.DotDoAn.NgayBatDau.ToString("dd/MM/yyyy") : "---"))</p>
                         </div>
                         <div class="col-sm-6 mb-3">
                             <h6 class="text-muted fw-bold mb-1">Hạn nộp dự kiến</h6>
-                            <p class="fs-5"><i class="fa-regular fa-calendar-xmark text-danger me-2"></i> @Model.NgayKetThuc.ToString("dd/MM/yyyy")</p>
+                            <p class="fs-5"><i class="fa-regular fa-calendar-xmark text-danger me-2"></i> @(Model.NgayKetThuc.Year > 1 ? Model.NgayKetThuc.ToString("dd/MM/yyyy") : (Model.DotDoAn != null ? Model.DotDoAn.HanNopBaoCao.ToString("dd/MM/yyyy") : "---"))</p>
                         </div>
                     </div>
                 </div>

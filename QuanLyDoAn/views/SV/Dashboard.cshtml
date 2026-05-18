@@ -36,11 +36,18 @@
                     <div class="fs-5 fw-semibold" id="dtGV">Đang tải...</div>
                 </div>
 
-                <div class="d-flex mb-4 align-items-center">
+                <div class="d-flex mb-3 align-items-center">
                     <div class="me-4 text-muted">
                         <i class="fa-solid fa-calendar-xmark me-1"></i> Hạn nộp báo cáo:
                     </div>
                     <div class="fs-5 fw-semibold text-danger" id="dtHanNop">Đang tải...</div>
+                </div>
+                
+                <div class="d-flex mb-4 align-items-center">
+                    <div class="me-4 text-muted">
+                        <i class="fa-solid fa-clock me-1"></i> Thời gian còn lại:
+                    </div>
+                    <div class="fs-5 fw-semibold text-warning" id="dtSoNgayConLai">Đang tải...</div>
                 </div>
 
                 <h5 class="small font-weight-bold">Tiến độ hoàn thành <span class="float-end" id="dtPhanTramText">0%</span></h5>
@@ -94,6 +101,12 @@
                     $("#dtTrangThai").text(tt).removeClass('bg-primary bg-secondary bg-success bg-warning text-dark').addClass(badgeClass);
 
                     $("#dtHanNop").text(data.hanNop);
+
+                    if (data.soNgayConLai > 0) {
+                        $("#dtSoNgayConLai").text(data.soNgayConLai + " ngày");
+                    } else {
+                        $("#dtSoNgayConLai").text("Đã quá hạn").removeClass("text-warning").addClass("text-danger");
+                    }
 
                     var phanTram = data.phanTramTienDo;
                     $("#dtPhanTramText").text(phanTram + "%");
