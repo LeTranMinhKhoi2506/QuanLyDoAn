@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "Đăng ký đề tài";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var dotDoAn = (QuanLyDoAn.Models.DotDoAn)ViewBag.DotDoAn;
 }
 
 <div class="container mt-4">
@@ -11,6 +12,49 @@
     {
         <div class="alert alert-warning">
             @TempData["Message"]
+        </div>
+    }
+
+    <!-- Hiển thị thông tin Đợt đồ án -->
+    @if (dotDoAn != null)
+    {
+        <div class="alert alert-info mt-3">
+            <h5 class="alert-heading"><i class="fa-solid fa-info-circle me-2"></i>Thông tin Đợt Đồ Án</h5>
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <p class="mb-2">
+                        <strong>Tên đợt:</strong> <span class="text-primary">@dotDoAn.TenDot</span>
+                    </p>
+                    <p class="mb-2">
+                        <strong>Loại đợt:</strong> @dotDoAn.LoaiDot
+                    </p>
+                    <p class="mb-2">
+                        <strong>Năm học:</strong> @dotDoAn.NamHoc
+                    </p>
+                    <p class="mb-2">
+                        <strong>Học kỳ:</strong> @dotDoAn.HocKy
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-2">
+                        <strong>Ngày bắt đầu:</strong> <span class="text-success">@dotDoAn.NgayBatDau.ToString("dd/MM/yyyy")</span>
+                    </p>
+                    <p class="mb-2">
+                        <strong>Ngày kết thúc:</strong> <span class="text-success">@dotDoAn.NgayKetThuc.ToString("dd/MM/yyyy")</span>
+                    </p>
+                    <p class="mb-2">
+                        <strong>Hạn đăng ký đề tài:</strong> <span class="text-danger fw-bold">@dotDoAn.HanDangKyDeTai.ToString("dd/MM/yyyy")</span>
+                    </p>
+                    <p class="mb-2">
+                        <strong>Hạn nộp báo cáo:</strong> <span class="text-danger fw-bold">@dotDoAn.HanNopBaoCao.ToString("dd/MM/yyyy")</span>
+                    </p>
+                </div>
+            </div>
+            @if (!string.IsNullOrEmpty(dotDoAn.MoTa))
+            {
+                <hr />
+                <p class="mb-0"><strong>Ghi chú:</strong> @dotDoAn.MoTa</p>
+            }
         </div>
     }
 
