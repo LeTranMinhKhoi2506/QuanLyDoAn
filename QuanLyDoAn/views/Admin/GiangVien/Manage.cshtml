@@ -43,6 +43,8 @@
                     @foreach (var item in Model)
                     {
                         var isLocked = item.User?.Role == "Inactive";
+                        var dsSinhVien = item.DeTaisHuongDan.Where(d => d.SinhVien != null).Select(d => d.SinhVien).Distinct().Count();
+                        var soDeTai = item.DeTaisHuongDan?.Count ?? 0;
                         <tr class="@(isLocked ? "table-secondary text-muted" : "")">
                             <td>@item.MaGiangVien</td>
                             <td class="fw-bold">@item.HoTen</td>
@@ -50,12 +52,11 @@
                             <td>@item.HocVi</td>
                             <td>@item.Email</td>
                             <td class="text-center">
-                                <span class="@(item.SoLuongSinhVienDangHuongDan >= item.GioiHanSinhVien ? "text-danger fw-bold" : "")">
-                                    @item.SoLuongSinhVienDangHuongDan / @item.GioiHanSinhVien
+                                <span class="@(dsSinhVien >= item.GioiHanSinhVien ? "text-danger fw-bold" : "")">
+                                    @dsSinhVien / @item.GioiHanSinhVien
                                 </span>
                             </td>
                             <td class="text-center">
-                                @{ var soDeTai = item.DeTaisHuongDan?.Count ?? 0; }
                                 <span class="@(soDeTai >= item.GioiHanDeTai ? "text-danger fw-bold" : "")">
                                     @soDeTai / @item.GioiHanDeTai
                                 </span>

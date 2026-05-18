@@ -48,8 +48,7 @@ public class SVController : Controller
             });
         }
 
-        // Tính % tiến độ (Ví dụ: Tổng % của các task / số tasks hoặc lấy max tùy logic)
-        // Ở đây lấy trung bình cộng làm ví dụ
+        // Tính % tiến độ
         int phanTramTienDo = deTai.TienDos.Any() ? (int)deTai.TienDos.Average(t => t.PhanTramHoanThanh) : 0;
 
         var nhanXetMoiNhat = deTai.TienDos
@@ -57,6 +56,12 @@ public class SVController : Controller
             .OrderByDescending(t => t.NgayCapNhat)
             .Select(t => t.NhanXetCuaGiangVien)
             .FirstOrDefault();
+
+        int soNgayConLai = 0;
+        if (deTai.DotDoAn != null && deTai.DotDoAn.HanNopBaoCao > DateTime.Now)
+        {
+            soNgayConLai = (deTai.DotDoAn.HanNopBaoCao - DateTime.Now).Days;
+        }
 
         return Json(new
         {
@@ -66,7 +71,8 @@ public class SVController : Controller
             trangThai = deTai.TrangThai,
             phanTramTienDo = phanTramTienDo,
             hanNop = deTai.DotDoAn?.HanNopBaoCao.ToString("dd/MM/yyyy") ?? "Chưa xác định",
-            nhanXetMoiNhat = nhanXetMoiNhat ?? "Chưa có nhận xét nào"
+            nhanXetMoiNhat = nhanXetMoiNhat ?? "Chưa có nhận xét nào",
+            soNgayConLai = soNgayConLai
         });
     }
 
@@ -74,6 +80,16 @@ public class SVController : Controller
     public IActionResult ThongBao()
     {
         return View();
+    }
+
+    // Hiển thị các đợt đồ án
+    public async Task<IActionResult> DotDoAn()
+    {
+        var dotDoAns = await _context.DotDoAns
+            .Where(d => d.TrangThai != "Chưa mở")
+            .OrderByDescending(d => d.NgayBatDau)
+            .ToListAsync();
+        return View(dotDoAns);
     }
 
     // 1. Đăng ký / Đề xuất đề tài
@@ -98,8 +114,21 @@ public class SVController : Controller
             return RedirectToAction(nameof(DeTaiCuaToi));
         }
 
+        var dotDoAn = await _context.DotDoAns.FirstOrDefaultAsync(d => d.TrangThai == "Đang mở" || d.DangMoDangKy == true);
+        if (dotDoAn == null)
+        {
+            TempData["Message"] = "Hiện tại không có đợt đồ án nào đang mở đăng ký.";
+            return RedirectToAction(nameof(Dashboard));
+        }
+        if (DateTime.Now > dotDoAn.HanDangKyDeTai)
+        {
+            TempData["Message"] = "Đã hết thời gian đăng ký đề tài trong đợt này.";
+            return RedirectToAction(nameof(Dashboard));
+        }
+
         // Lấy danh sách giảng viên để chọn
         ViewBag.GiangViens = await _context.GiangViens.ToListAsync();
+        ViewBag.DotDoAn = dotDoAn;
         return View();
     }
 
@@ -122,11 +151,21 @@ public class SVController : Controller
             return RedirectToAction(nameof(DeTaiCuaToi));
         }
 
+        var dotDoAn = await _context.DotDoAns.FirstOrDefaultAsync(d => d.TrangThai == "Đang mở" || d.DangMoDangKy == true);
+        if (dotDoAn == null || DateTime.Now > dotDoAn.HanDangKyDeTai)
+        {
+            TempData["Message"] = "Hiện tại không có đợt đồ án nào đang mở hoặc đã hết hạn đăng ký.";
+            return RedirectToAction(nameof(Dashboard));
+        }
+
         if (ModelState.IsValid)
         {
             model.SinhVienId = sinhVien.Id;
+            model.DotDoAnId = dotDoAn.Id;
             model.TrangThai = "Chờ duyệt";
             model.NgayTao = DateTime.Now;
+            model.NgayBatDau = dotDoAn.NgayBatDau;
+            model.NgayKetThuc = dotDoAn.HanNopBaoCao;
 
             // Generate a random MaDeTai or logic based
             model.MaDeTai = "DT" + DateTime.Now.Ticks.ToString().Substring(10); 
@@ -157,9 +196,142 @@ public class SVController : Controller
         var deTai = await _context.DeTais
             .Include(d => d.GiangVien)
             .Include(d => d.TienDos)
+            .Include(d => d.DotDoAn)
             .FirstOrDefaultAsync(d => d.SinhVienId == sinhVien.Id);
 
         return View(deTai);
+    }
+
+    // 2.1 Sửa đề tài (Khi bị yêu cầu chỉnh sửa hoặc từ chối)
+    [HttpGet]
+    public async Task<IActionResult> SuaDeTai(int id)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out int userId))
+        {
+             return RedirectToAction("Login", "Account");
+        }
+
+        var sinhVien = await _context.SinhViens.FirstOrDefaultAsync(s => s.UserId == userId);
+        if (sinhVien == null) return NotFound();
+
+        var deTai = await _context.DeTais.Include(d => d.DotDoAn).FirstOrDefaultAsync(d => d.Id == id && d.SinhVienId == sinhVien.Id);
+        
+        if (deTai == null) return NotFound("Đề tài không tồn tại.");
+
+        if (deTai.TrangThai != "Yêu cầu chỉnh sửa" && deTai.TrangThai != "Bị từ chối")
+        {
+            TempData["Message"] = "Đề tài này không thể chỉnh sửa trong trạng thái hiện tại.";
+            return RedirectToAction(nameof(DeTaiCuaToi));
+        }
+
+        if (deTai.TrangThai == "Bị từ chối" && deTai.DotDoAn != null && DateTime.Now > deTai.DotDoAn.HanDangKyDeTai)
+        {
+            TempData["Message"] = "Đã hết thời hạn đăng ký đề tài. Bạn không thể gửi lại đề xuất bị từ chối.";
+            return RedirectToAction(nameof(DeTaiCuaToi));
+        }
+        else if (deTai.TrangThai == "Yêu cầu chỉnh sửa" && deTai.NgayDuyet.HasValue && DateTime.Now > deTai.NgayDuyet.Value.AddDays(3))
+        {
+            TempData["Message"] = "Đã quá thời hạn 3 ngày để chỉnh sửa đề tài. Vui lòng liên hệ giảng viên.";
+            return RedirectToAction(nameof(DeTaiCuaToi));
+        }
+
+        ViewBag.GiangViens = await _context.GiangViens.ToListAsync();
+        return View(deTai);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> SuaDeTai(int id, DeTai model)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out int userId))
+        {
+             return RedirectToAction("Login", "Account");
+        }
+
+        var sinhVien = await _context.SinhViens.FirstOrDefaultAsync(s => s.UserId == userId);
+        if (sinhVien == null) return NotFound();
+
+        var deTai = await _context.DeTais.Include(d => d.DotDoAn).FirstOrDefaultAsync(d => d.Id == id && d.SinhVienId == sinhVien.Id);
+        if (deTai == null) return NotFound();
+
+        if (deTai.TrangThai != "Yêu cầu chỉnh sửa" && deTai.TrangThai != "Bị từ chối")
+        {
+            TempData["Message"] = "Đề tài này không thể chỉnh sửa trong trạng thái hiện tại.";
+            return RedirectToAction(nameof(DeTaiCuaToi));
+        }
+
+        if (deTai.TrangThai == "Bị từ chối" && deTai.DotDoAn != null && DateTime.Now > deTai.DotDoAn.HanDangKyDeTai)
+        {
+            TempData["Message"] = "Đã hết thời hạn đăng ký đề tài. Bạn không thể gửi lại đề xuất bị từ chối.";
+            return RedirectToAction(nameof(DeTaiCuaToi));
+        }
+        else if (deTai.TrangThai == "Yêu cầu chỉnh sửa" && deTai.NgayDuyet.HasValue && DateTime.Now > deTai.NgayDuyet.Value.AddDays(3))
+        {
+            TempData["Message"] = "Đã quá thời hạn 3 ngày để chỉnh sửa đề tài. Vui lòng liên hệ giảng viên.";
+            return RedirectToAction(nameof(DeTaiCuaToi));
+        }
+
+        // Loại bỏ các trường không cần kiểm tra validation
+        ModelState.Remove("SinhVien");
+        ModelState.Remove("GiangVien");
+        ModelState.Remove("DotDoAn");
+        ModelState.Remove("HoiDong");
+        ModelState.Remove("TienDos");
+
+        if (ModelState.IsValid)
+        {
+            deTai.TenDeTai = model.TenDeTai;
+            deTai.MoTaDeTai = model.MoTaDeTai;
+            deTai.LoaiDeTai = model.LoaiDeTai;
+            deTai.CongNgheSuDung = model.CongNgheSuDung;
+            deTai.GiangVienId = model.GiangVienId;
+            
+            // Chuyển lại trạng thái thành Chờ duyệt
+            deTai.TrangThai = "Chờ duyệt";
+
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Cập nhật đề tài thành công, đã gửi lại yêu cầu duyệt.";
+            return RedirectToAction(nameof(DeTaiCuaToi));
+        }
+
+        ViewBag.GiangViens = await _context.GiangViens.ToListAsync();
+        return View(model);
+    }
+
+    // 2.2 Xóa đề tài (Khi bị từ chối hoặc yêu cầu chỉnh sửa mà sinh viên muốn bỏ)
+    [HttpPost]
+    public async Task<IActionResult> XoaDeTai(int id)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out int userId))
+        {
+             return RedirectToAction("Login", "Account");
+        }
+
+        var sinhVien = await _context.SinhViens.FirstOrDefaultAsync(s => s.UserId == userId);
+        if (sinhVien == null) return NotFound();
+
+        var deTai = await _context.DeTais.Include(d => d.DotDoAn).FirstOrDefaultAsync(d => d.Id == id && d.SinhVienId == sinhVien.Id);
+        if (deTai == null) return NotFound();
+
+        if (deTai.TrangThai != "Yêu cầu chỉnh sửa" && deTai.TrangThai != "Bị từ chối" && deTai.TrangThai != "Chờ duyệt")
+        {
+            TempData["Message"] = "Đề tài này không thể xóa trong trạng thái hiện tại.";
+            return RedirectToAction(nameof(DeTaiCuaToi));
+        }
+
+        if (deTai.TrangThai == "Chờ duyệt" && deTai.DotDoAn != null && DateTime.Now > deTai.DotDoAn.HanDangKyDeTai)
+        {
+            TempData["Message"] = "Đã hết thời hạn đăng ký. Bạn không thể tự ý rút đề tài lúc này.";
+            return RedirectToAction(nameof(DeTaiCuaToi));
+        }
+
+        deTai.IsDeleted = true;
+        await _context.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "Đã xóa đề tài thành công. Bạn có thể đăng ký đề tài mới.";
+        return RedirectToAction(nameof(DeTaiCuaToi));
     }
 
     // 3. Cập nhật tiến độ
@@ -181,6 +353,13 @@ public class SVController : Controller
         if (deTai == null)
         {
             TempData["Message"] = "Bạn chưa có đề tài, không thể cập nhật tiến độ.";
+            return RedirectToAction(nameof(DeTaiCuaToi));
+        }
+
+        var lockedStates = new[] { "Chờ duyệt", "Yêu cầu chỉnh sửa", "Bị từ chối" };
+        if (lockedStates.Contains(deTai.TrangThai))
+        {
+            TempData["Message"] = $"Đề tài đang ở trạng thái '{deTai.TrangThai}', không thể quản lý tiến độ lúc này.";
             return RedirectToAction(nameof(DeTaiCuaToi));
         }
 
@@ -253,11 +432,25 @@ public class SVController : Controller
         if (sinhVien == null) return NotFound("Student profile not found.");
 
         var deTai = await _context.DeTais
+            .Include(d => d.DotDoAn)
             .FirstOrDefaultAsync(d => d.SinhVienId == sinhVien.Id);
 
         if (deTai == null)
         {
             TempData["Message"] = "Bạn chưa có đề tài, không thể nộp báo cáo.";
+            return RedirectToAction(nameof(DeTaiCuaToi));
+        }
+
+        if (deTai.DotDoAn != null && DateTime.Now > deTai.DotDoAn.HanNopBaoCao)
+        {
+            TempData["Message"] = "Đã quá hạn nộp báo cáo đồ án.";
+            return RedirectToAction(nameof(DeTaiCuaToi));
+        }
+
+        var lockedStates = new[] { "Chờ duyệt", "Yêu cầu chỉnh sửa", "Bị từ chối" };
+        if (lockedStates.Contains(deTai.TrangThai))
+        {
+            TempData["Message"] = $"Đề tài đang ở trạng thái '{deTai.TrangThai}', không thể nộp báo cáo lúc này.";
             return RedirectToAction(nameof(DeTaiCuaToi));
         }
 
@@ -281,8 +474,14 @@ public class SVController : Controller
         var sinhVien = await _context.SinhViens.FirstOrDefaultAsync(s => s.UserId == userId);
         if (sinhVien == null) return NotFound("Student profile not found.");
 
-        var deTai = await _context.DeTais.FirstOrDefaultAsync(d => d.SinhVienId == sinhVien.Id);
+        var deTai = await _context.DeTais.Include(d => d.DotDoAn).FirstOrDefaultAsync(d => d.SinhVienId == sinhVien.Id);
         if (deTai == null) return NotFound("Đề tài không tồn tại.");
+
+        if (deTai.DotDoAn != null && DateTime.Now > deTai.DotDoAn.HanNopBaoCao)
+        {
+            TempData["Message"] = "Đã quá hạn nộp báo cáo đồ án.";
+            return RedirectToAction(nameof(DeTaiCuaToi));
+        }
 
         var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "baocao");
         if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);

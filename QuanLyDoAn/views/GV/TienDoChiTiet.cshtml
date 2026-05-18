@@ -38,7 +38,7 @@
                     <h5 class="text-primary fw-bold mb-2">@deTai?.TenDeTai</h5>
                     <div class="d-flex gap-3 text-muted small">
                         <span><i class="fa-solid fa-user me-1"></i> SV: @(deTai?.SinhVien?.HoTen ?? "---")</span>
-                        <span><i class="fa-solid fa-calendar me-1"></i> Bắt đầu: @(deTai?.NgayBatDau.ToString("dd/MM/yyyy") ?? "---")</span>
+                        <span><i class="fa-solid fa-calendar me-1"></i> Bắt đầu: @(deTai?.NgayBatDau.Year > 1 ? deTai.NgayBatDau.ToString("dd/MM/yyyy") : (deTai?.DotDoAn != null ? deTai.DotDoAn.NgayBatDau.ToString("dd/MM/yyyy") : "---"))</span>
                     </div>
                 </div>
                 <div class="col-md-5 text-md-center mt-3 mt-md-0">

@@ -1,0 +1,62 @@
+@model QuanLyDoAn.Models.DeTai
+@{
+    ViewData["Title"] = "Sửa đề tài";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2>Sửa thông tin đề tài</h2>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-warning">
+            @TempData["Message"]
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-warning">
+            <strong>Trạng thái:</strong> @Model.TrangThai 
+            @if(!string.IsNullOrEmpty(Model.LyDoTuChoi))
+            {
+                <br/><strong>Lý do từ chối/yêu cầu sửa:</strong> @Model.LyDoTuChoi
+            }
+        </div>
+        <div class="card-body">
+            <form asp-action="SuaDeTai" method="post">
+                <input type="hidden" asp-for="Id" />
+                <div class="mb-3">
+                    <label asp-for="TenDeTai" class="form-label">Tên đề tài</label>
+                    <input asp-for="TenDeTai" class="form-control" required placeholder="Nhập tên đề tài..." />
+                    <span asp-validation-for="TenDeTai" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="MoTaDeTai" class="form-label">Mô tả tóm tắt</label>
+                    <textarea asp-for="MoTaDeTai" class="form-control" rows="4" placeholder="Nhập mô tả chi tiết..."></textarea>
+                    <span asp-validation-for="MoTaDeTai" class="text-danger"></span>
+                </div>
+
+                 <div class="mb-3">
+                    <label asp-for="CongNgheSuDung" class="form-label">Công nghệ dự kiến sử dụng</label>
+                    <input asp-for="CongNgheSuDung" class="form-control" placeholder="Ví dụ: ASP.NET Core, React, SQL Server..." />
+                    <span asp-validation-for="CongNgheSuDung" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="GiangVienId" class="form-label">Giảng viên hướng dẫn mong muốn (Tùy chọn)</label>
+                    <select asp-for="GiangVienId" class="form-select">
+                        <option value="">-- Chọn giảng viên --</option>
+                        @foreach (var gv in ViewBag.GiangViens)
+                        {
+                            <option value="@gv.Id">@gv.HoTen (Giới hạn: @gv.SoLuongSinhVienDangHuongDan/@gv.GioiHanSinhVien)</option>
+                        }
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Lưu thay đổi & Gửi duyệt lại</button>
+                <a asp-action="DeTaiCuaToi" class="btn btn-secondary">Hủy bỏ</a>
+            </form>
+        </div>
+    </div>
+</div>

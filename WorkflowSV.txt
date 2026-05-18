@@ -1,0 +1,290 @@
+# 1. Ai quyết định thời gian làm đồ án?
+
+Thông thường:
+
+| Vai trò    | Nhiệm vụ                           |
+| ---------- | ---------------------------------- |
+| Admin/Khoa | Tạo đợt đồ án và quy định timeline |
+| Sinh viên  | Đăng ký trong thời gian cho phép   |
+| Giảng viên | Duyệt và hướng dẫn                 |
+| Hội đồng   | Chấm và bảo vệ                     |
+
+---
+
+# 2. Thời gian nên nằm ở đâu?
+
+Bạn nên đặt toàn bộ timeline trong:
+
+DotDoAn
+
+# 3. Timeline thực tế nên như thế nào?
+
+Ví dụ:
+Đợt: Khóa luận tốt nghiệp HK2 2025-2026
+
+01/03 - 10/03: Mở đăng ký đề tài
+11/03 - 15/03: Giảng viên duyệt đề tài
+16/03 - 30/05: Thực hiện đồ án
+Hàng tuần: Cập nhật tiến độ
+25/05: Hạn nộp báo cáo
+01/06: Bảo vệ
+05/06: Công bố kết quả
+
+# 4. Quy trình sinh viên sử dụng hệ thống
+
+Đây là workflow hợp lý nhất.
+
+---
+
+# Giai đoạn 1 — Đăng nhập
+
+Sinh viên:
+
+Đăng nhập
+→ Vào dashboard sinh viên
+
+# Giai đoạn 2 — Xem đợt đồ án đang mở
+
+Sinh viên vào:
+Danh sách đợt đồ án
+
+Ví dụ:
+HK2 2025-2026
+Trạng thái: Đang mở đăng ký
+Hạn đăng ký: 10/03/2026
+
+Nếu:
+
+Ngày hiện tại > Hạn đăng ký
+
+thì không cho đăng ký nữa.
+
+---
+
+# Giai đoạn 3 — Chọn hoặc đề xuất đề tài
+
+Sinh viên có 2 hướng:
+
+---
+
+## Hướng 1 — Chọn đề tài có sẵn
+
+Admin hoặc giảng viên đã tạo trước đề tài.
+
+Sinh viên:
+
+Xem danh sách đề tài
+→ Chọn đề tài
+→ Đăng ký
+
+Ví dụ:
+
+DT001 - Website quản lý đồ án
+GV hướng dẫn: Nguyễn Văn A
+Công nghệ: ASP.NET Core
+
+
+Sau khi đăng ký:
+
+Trạng thái = Chờ duyệt
+
+---
+
+## Hướng 2 — Đề xuất đề tài mới
+
+Sinh viên nhập:
+
+Tên đề tài
+Mô tả
+Mục tiêu
+Công nghệ
+Giảng viên mong muốn
+
+Sau đó:
+
+Gửi đề xuất
+→ Chờ giảng viên duyệt
+
+---
+
+# Giai đoạn 4 — Giảng viên duyệt
+
+Giảng viên vào:
+
+Đề tài chờ duyệt
+
+Có thể:
+
+Duyệt
+Từ chối
+Yêu cầu chỉnh sửa
+
+Nếu duyệt:
+
+TrangThai = Đã duyệt
+
+Nếu từ chối:
+
+TrangThai = Bị từ chối
+
+và nhập lý do.
+
+Sinh viên nhận notification.
+
+---
+
+# Giai đoạn 5 — Thực hiện đồ án
+
+Sau khi được duyệt:
+
+Sinh viên bắt đầu làm đồ án
+
+Hệ thống mở:
+
+Cập nhật tiến độ
+Upload file
+Nhận xét
+
+---
+
+# Giai đoạn 6 — Cập nhật tiến độ
+
+Ví dụ mỗi tuần:
+
+Tuần 1:
+- Hoàn thành giao diện đăng nhập
+
+Tuần 2:
+- Hoàn thành database
+
+Giảng viên có thể:
+Nhận xét
+Yêu cầu sửa
+
+---
+
+# Giai đoạn 7 — Nộp báo cáo
+
+Trước hạn:
+HanNopBaoCao
+
+Sinh viên upload:
+
+PDF báo cáo
+Slide
+Source code ZIP
+
+Sau khi nộp:
+TrangThai = Đã nộp báo cáo
+---
+
+# Giai đoạn 8 — Gán hội đồng
+
+Admin:
+Tạo hội đồng
+→ Gán đề tài
+→ Sắp lịch bảo vệ
+
+Sinh viên nhận:
+Thông báo lịch bảo vệ
+
+---
+
+# Giai đoạn 9 — Bảo vệ và chấm điểm
+
+Hội đồng:
+Nhập điểm
+Nhận xét
+
+Sau khi hoàn thành:
+TrangThai = Đã hoàn thành
+
+---
+
+# 5. Làm sao hệ thống biết sinh viên còn thời gian hay không?
+
+Cách đúng là:
+So sánh DateTime.Now với các mốc trong DotDoAn
+
+Ví dụ:
+if (DateTime.Now > dotDoAn.HanDangKy)
+{
+    ModelState.AddModelError("", "Đã hết thời gian đăng ký đề tài.");
+}
+---
+
+## Kiểm tra hạn nộp báo cáo
+if (DateTime.Now > dotDoAn.HanNopBaoCao)
+{
+    ModelState.AddModelError("", "Đã quá hạn nộp báo cáo.");
+}
+
+---
+
+# 6. Dashboard sinh viên nên hiển thị gì?
+
+Rất nên có:
+Đề tài hiện tại
+Trạng thái đề tài
+Số ngày còn lại
+Tiến độ hiện tại
+Deadline tiếp theo
+Thông báo mới
+
+Ví dụ:
+Đề tài: Website quản lý đồ án
+Trạng thái: Đang thực hiện
+Tiến độ: 60%
+Còn lại: 12 ngày đến hạn nộp báo cáo
+
+---
+
+# 7. Trạng thái đề tài nên chuyển như thế nào?
+
+Workflow chuẩn:
+Chờ duyệt
+→ Đã duyệt
+→ Đang thực hiện
+→ Đã nộp báo cáo
+→ Đã bảo vệ
+→ Đã hoàn thành
+
+Có thể thêm:
+Bị từ chối
+Đã hủy
+Yêu cầu chỉnh sửa
+
+---
+
+# 8. Có nên cho sinh viên đổi đề tài không?
+
+Có thể.
+
+Nhưng nên giới hạn:
+Chỉ cho đổi trước hạn đăng ký
+
+Sau khi:
+Đã duyệt
+
+thì:
+Không cho đổi
+
+trừ Admin.
+
+---
+
+# 9. Nếu muốn thực tế hơn
+
+Bạn có thể chia timeline:
+
+| Giai đoạn   | Cho phép         |
+| ----------- | ---------------- |
+| Đăng ký     | Chọn đề tài      |
+| Duyệt       | Giảng viên duyệt |
+| Thực hiện   | Cập nhật tiến độ |
+| Nộp báo cáo | Upload file      |
+| Bảo vệ      | Hội đồng chấm    |
+| Hoàn thành  | Chỉ xem          |
+
+---
+

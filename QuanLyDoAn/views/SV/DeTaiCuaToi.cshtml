@@ -69,14 +69,77 @@
                     <div class="col-md-3 fw-bold text-muted">Ngày kết thúc dự kiến:</div>
                     <div class="col-md-9">@(Model.NgayKetThuc != default(DateTime) ? Model.NgayKetThuc.ToString("dd/MM/yyyy") : "Chưa xác định")</div>
                 </div>
+                
+                <!-- Hiển thị thông tin Đợt đồ án -->
+                @if (Model.DotDoAn != null)
+                {
+                    <hr />
+                    <div class="bg-light p-3 rounded mb-3">
+                        <h6 class="fw-bold text-primary mb-3">
+                            <i class="fa-solid fa-calendar-days me-2"></i>Thông tin Đợt Đồ Án
+                        </h6>
+                        <div class="row mb-2">
+                            <div class="col-md-3 fw-bold text-muted">Tên đợt:</div>
+                            <div class="col-md-9">@Model.DotDoAn.TenDot</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-3 fw-bold text-muted">Loại:</div>
+                            <div class="col-md-9">@Model.DotDoAn.LoaiDot</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-3 fw-bold text-muted">Năm học:</div>
+                            <div class="col-md-9">@Model.DotDoAn.NamHoc</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-3 fw-bold text-muted">Học kỳ:</div>
+                            <div class="col-md-9">@Model.DotDoAn.HocKy</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-3 fw-bold text-muted">Hạn nộp:</div>
+                            <div class="col-md-9">
+                                <span class="badge bg-danger">@Model.DotDoAn.HanNopBaoCao.ToString("dd/MM/yyyy")</span>
+                            </div>
+                        </div>
+                    </div>
+                }
             </div>
             <div class="card-footer bg-light p-3 gap-2 d-flex">
-                <a href="@Url.Action("CapNhatTienDo", "SV")" class="btn btn-primary @(Model.TrangThai == "Chờ duyệt" ? "disabled" : "")">
+                @{
+                    var isLocked = Model.TrangThai == "Chờ duyệt" || Model.TrangThai == "Yêu cầu chỉnh sửa" || Model.TrangThai == "Bị từ chối";
+                    var isNopBaoCaoLocked = isLocked || (Model.DotDoAn != null && DateTime.Now > Model.DotDoAn.HanNopBaoCao);
+                }
+                <a href="@Url.Action("CapNhatTienDo", "SV")" class="btn btn-primary @(isLocked ? "disabled" : "")">
                     <i class="fa-solid fa-tasks me-1"></i> Quản lý tiến độ
                 </a>
-                <a href="@Url.Action("NopBaoCao", "SV")" class="btn btn-success @(Model.TrangThai == "Chờ duyệt" ? "disabled" : "")">
+                <a href="@Url.Action("NopBaoCao", "SV")" class="btn btn-success @(isNopBaoCaoLocked ? "disabled" : "")">
                     <i class="fa-solid fa-cloud-arrow-up me-1"></i> Nộp báo cáo
                 </a>
+                
+                @{
+                    bool canSua = false;
+                    if (Model.TrangThai == "Yêu cầu chỉnh sửa" && Model.NgayDuyet.HasValue && DateTime.Now <= Model.NgayDuyet.Value.AddDays(3)) canSua = true;
+                    if (Model.TrangThai == "Bị từ chối" && Model.DotDoAn != null && DateTime.Now <= Model.DotDoAn.HanDangKyDeTai) canSua = true;
+
+                    bool canXoa = false;
+                    if (Model.TrangThai == "Chờ duyệt" && Model.DotDoAn != null && DateTime.Now <= Model.DotDoAn.HanDangKyDeTai) canXoa = true;
+                    if (Model.TrangThai == "Yêu cầu chỉnh sửa" || Model.TrangThai == "Bị từ chối") canXoa = true;
+                }
+
+                @if (canSua)
+                {
+                    <a href="@Url.Action("SuaDeTai", "SV", new { id = Model.Id })" class="btn btn-warning">
+                        <i class="fa-solid fa-pen-to-square me-1"></i> Sửa đề tài
+                    </a>
+                }
+                
+                @if (canXoa)
+                {
+                    <form asp-action="XoaDeTai" asp-controller="SV" asp-route-id="@Model.Id" method="post" class="m-0 p-0" onsubmit="return confirm('Bạn có chắc chắn muốn hủy/xóa đề tài này không? Việc này không thể hoàn tác.');">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fa-solid fa-trash me-1"></i> Rút / Xóa đề tài
+                        </button>
+                    </form>
+                }
             </div>
         </div>
     }
